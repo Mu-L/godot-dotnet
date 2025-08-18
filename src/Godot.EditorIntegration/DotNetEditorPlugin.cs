@@ -32,12 +32,14 @@ internal sealed partial class DotNetEditorPlugin : EditorPlugin
 
     private DotNetExportPlugin _exportPlugin;
 
+    private DotNetEditorExtensionSourceCodePlugin _sourceCodePlugin;
+
     public CodeEditorManagers CodeEditorManager { get; private set; }
 #nullable enable
 
     protected override string _GetPluginName() => ".NET";
 
-    private bool CreateProjectSolution()
+    internal bool CreateProjectSolution()
     {
         string? errorMessage = EditorProgress.Invoke("create_csharp_solution", SR.DotNetEditorPlugin_GenerateSolutionEditorProgressLabel, 2, progress =>
         {
@@ -336,6 +338,9 @@ internal sealed partial class DotNetEditorPlugin : EditorPlugin
         _exportPlugin = new DotNetExportPlugin();
         AddExportPlugin(_exportPlugin);
 
+        // Source code plugin.
+        _sourceCodePlugin = new DotNetEditorExtensionSourceCodePlugin();
+
         CodeEditorManager = new CodeEditorManagers();
     }
 
@@ -346,6 +351,9 @@ internal sealed partial class DotNetEditorPlugin : EditorPlugin
         // Export plugin.
         RemoveExportPlugin(_exportPlugin);
         _exportPlugin.Dispose();
+
+        // Source code plugin.
+        _sourceCodePlugin.Dispose();
 
         // .NET build button.
         _toolBarBuildButton?.QueueFree();
