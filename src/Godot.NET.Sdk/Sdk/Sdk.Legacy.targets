@@ -1,0 +1,53 @@
+<Project>
+
+  <!-- Godot DefineConstants. -->
+  <PropertyGroup>
+    <!-- Define constants to identify Godot builds. -->
+    <_GodotDefineConstants>GODOT</_GodotDefineConstants>
+
+    <!--
+      Define constant to determine the target Godot platform. This includes the
+      recognized platform names and the platform category (PC, MOBILE or WEB).
+    -->
+    <_GodotPlatformConstants Condition="'$(GodotTargetPlatform)' == 'windows'">GODOT_WINDOWS;GODOT_PC</_GodotPlatformConstants>
+    <_GodotPlatformConstants Condition="'$(GodotTargetPlatform)' == 'linuxbsd'">GODOT_LINUXBSD;GODOT_PC</_GodotPlatformConstants>
+    <_GodotPlatformConstants Condition="'$(GodotTargetPlatform)' == 'macos'">GODOT_OSX;GODOT_MACOS;GODOT_PC</_GodotPlatformConstants>
+    <_GodotPlatformConstants Condition="'$(GodotTargetPlatform)' == 'android'">GODOT_ANDROID;GODOT_MOBILE</_GodotPlatformConstants>
+    <_GodotPlatformConstants Condition="'$(GodotTargetPlatform)' == 'ios'">GODOT_IPHONE;GODOT_IOS;GODOT_MOBILE</_GodotPlatformConstants>
+    <_GodotPlatformConstants Condition="'$(GodotTargetPlatform)' == 'web'">GODOT_JAVASCRIPT;GODOT_HTML5;GODOT_WASM;GODOT_WEB</_GodotPlatformConstants>
+
+    <_GodotDefineConstants>$(_GodotDefineConstants);$(_GodotPlatformConstants);$(_GodotVersionConstants)</_GodotDefineConstants>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <!--
+    Define constant to determine whether the real_t type in Godot is double precision or not.
+    By default this is false, like the official Godot builds. If someone is using a custom
+    Godot build where real_t is double, they can override the GodotFloat64 property.
+    -->
+    <DefineConstants Condition="'$(GodotFloat64)' == 'true'">GODOT_REAL_T_IS_DOUBLE;$(DefineConstants)</DefineConstants>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <!-- ExportDebug also defines DEBUG like Debug does. -->
+    <DefineConstants Condition="'$(Configuration)' == 'ExportDebug'">$(DefineConstants);DEBUG</DefineConstants>
+    <!-- Debug defines TOOLS to differentiate between Debug and ExportDebug configurations. -->
+    <DefineConstants Condition="'$(Configuration)' == 'Debug'">$(DefineConstants);TOOLS</DefineConstants>
+
+    <DefineConstants>$(_GodotDefineConstants);$(DefineConstants)</DefineConstants>
+  </PropertyGroup>
+
+  <!-- GodotSharp references. -->
+  <ItemGroup Condition="'$(DisableImplicitGodotGeneratorReferences)' != 'true'">
+    <PackageReference Include="Godot.SourceGenerators" IsImplicitlyDefined="true" Version="$(PackageVersion_Godot_SourceGenerators)" ReferenceOutputAssembly="false" PrivateAssets="all" />
+  </ItemGroup>
+  <ItemGroup Condition="'$(DisableImplicitGodotSharpReferences)' != 'true'">
+    <PackageReference Include="GodotSharp" IsImplicitlyDefined="true" Version="$(PackageVersion_GodotSharp)" />
+    <PackageReference Include="GodotSharpEditor" IsImplicitlyDefined="true" Version="$(PackageVersion_GodotSharp)" Condition="'$(Configuration)' == 'Debug'" />
+  </ItemGroup>
+
+  <Target Name="CheckGodotDotNetReferences" BeforeTargets="Build">
+    <Error Text="The project or one of its dependencies references Godot .NET packages which are incompatible with the active Godot C# bindings. The active C# bindings is GodotSharp." Condition="$([System.String]::Copy('%(Reference.Identity)').Contains('Godot.Bindings.dll'))" />
+  </Target>
+
+</Project>
