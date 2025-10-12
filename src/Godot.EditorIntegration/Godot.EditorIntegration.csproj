@@ -23,6 +23,15 @@
     <NoWarn>$(NoWarn);NU5100</NoWarn>
   </PropertyGroup>
 
+  <!--
+    Microsoft.CodeAnalysis.Workspaces.MSBuild v4.8.0 references System.Text.Json v7.0.3 which breaks our code
+    because the source generators use API that was introduced later, so it throws MissingMethodException.
+    We force the version to 9.0.0 until we can update to newer version of Microsoft.CodeAnalysis.Workspace.MSBuild.
+  -->
+  <ItemGroup>
+    <PackageReference Include="System.Text.Json" Version="9.0.0" />
+  </ItemGroup>
+
   <ItemGroup>
     <ProjectReference Include="..\Godot.Bindings\Godot.Bindings.csproj" />
     <ProjectReference Include="..\Godot.Analyzers\Godot.Analyzers.csproj" ReferenceOutputAssembly="false" OutputItemType="Analyzer" />
@@ -44,6 +53,10 @@
     <PackageReference Update="Microsoft.CodeAnalysis.CSharp.Workspaces" PrivateAssets="contentfiles;analyzers;build" />
     <PackageReference Include="Microsoft.CodeAnalysis.Workspaces.MSBuild" Version="$(MicrosoftCodeAnalysisWorkspacesMSBuildVersion)" />
     <PackageReference Include="Microsoft.VisualStudio.SolutionPersistence" Version="$(MicrosoftVisualStudioSolutionPersistenceVersion)" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="System.Collections.Immutable" Version="9.0.0" />
   </ItemGroup>
 
   <ItemGroup>

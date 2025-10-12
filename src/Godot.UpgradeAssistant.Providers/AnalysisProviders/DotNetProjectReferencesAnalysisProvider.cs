@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using Microsoft.Build.Definition;
 using Microsoft.CodeAnalysis;
 using NuGet.Frameworks;
+using NuGet.LibraryModel;
 using NuGet.ProjectModel;
 using Serilog;
 
@@ -148,7 +149,7 @@ internal sealed class DotNetProjectReferencesAnalysisProvider : IAnalysisProvide
             return [];
         }
 
-        return targetFrameworkInformation.Dependencies.Select(d => d.Name);
+        return targetFrameworkInformation.Dependencies().Select(d => d.Name);
     }
 
     private static IEnumerable<string> GetTopLevelProjectReferences(string targetFrameworkMoniker, LockFile assetsFile, Dictionary<string, string> projectReferenceNameByPath)
@@ -285,5 +286,27 @@ internal sealed class DotNetProjectReferencesAnalysisProvider : IAnalysisProvide
         }
 
         return null;
+    }
+}
+
+// TODO: Remove when moving to NuGet.ProjectModel 6.13.1 or later.
+file static class CompatExtensions
+{
+    public static IEnumerable<LibraryDependency> Dependencies(this TargetFrameworkInformation information)
+    {
+        // The Dependencies property was changed from 'IList<LibraryDependency>' to 'ImmutableArray<LibraryDependency>'
+        // in 6.13.1, breaking binary compatibility. Until we can update to a newer version of the NuGet packages,
+        // this will throw an exception on newer SDKs. To work around this, we'll use reflection to access the
+        // dependencies.
+        var dependenciesProperty = typeof(TargetFrameworkInformation).GetProperty(nameof(TargetFrameworkInformation.Dependencies));
+        if (dependenciesProperty != null)
+        {
+            var dependencies = dependenciesProperty.GetValue(information);
+            if (dependencies is IEnumerable<LibraryDependency> deps)
+            {
+                return deps;
+            }
+        }
+        return [];
     }
 }
