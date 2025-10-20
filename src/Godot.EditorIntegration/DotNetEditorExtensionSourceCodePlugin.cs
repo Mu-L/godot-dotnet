@@ -75,6 +75,77 @@ internal sealed partial class DotNetEditorExtensionSourceCodePlugin : EditorExte
         }
     }
 
+    protected override StringName _GetClassNameFromSourcePath(string sourcePath)
+    {
+        try
+        {
+            return GetClassNameFromSourcePathCoreAsync(sourcePath).Result;
+        }
+        catch (Exception e)
+        {
+            GD.PrintErr($"Error getting class name for source path '{sourcePath}': {e}");
+            return StringName.Empty;
+        }
+
+        static async Task<StringName> GetClassNameFromSourcePathCoreAsync(string sourcePath, CancellationToken cancellationToken = default)
+        {
+            using var workspace = await DotNetWorkspace.OpenAsync(EditorPath.ProjectCSProjPath, cancellationToken).ConfigureAwait(false);
+            var document = workspace.GetDocumentForFilePath(sourcePath);
+            if (document is null)
+            {
+                // The file path does not correspond to any document in the project.
+                return StringName.Empty;
+            }
+
+            var syntaxRoot = await document.GetSyntaxRootAsync(cancellationToken).ConfigureAwait(false);
+            if (syntaxRoot is null)
+            {
+                return StringName.Empty;
+            }
+
+            var semanticModel = await document.GetSemanticModelAsync(cancellationToken).ConfigureAwait(false);
+            if (semanticModel is null)
+            {
+                return StringName.Empty;
+            }
+
+            INamedTypeSymbol? firstTypeSymbolDeclaredInDocument = null;
+            var classDeclarationSyntaxes = syntaxRoot
+                .DescendantNodes()
+                .OfType<ClassDeclarationSyntax>();
+            foreach (var classDeclarationSyntax in classDeclarationSyntaxes)
+            {
+                var symbol = semanticModel.GetDeclaredSymbol(classDeclarationSyntax, cancellationToken);
+                if (symbol is null)
+                {
+                    continue;
+                }
+
+                if (!symbol.HasAttribute(KnownTypeNames.GodotClassAttribute))
+                {
+                    continue;
+                }
+
+                if (firstTypeSymbolDeclaredInDocument is null)
+                {
+                    firstTypeSymbolDeclaredInDocument = symbol;
+                }
+                else
+                {
+                    GD.PushWarning($"Found more than one class declaration with [GodotClass] attribute in file '{sourcePath}', selecting the first one.");
+                    break;
+                }
+            }
+
+            if (firstTypeSymbolDeclaredInDocument is null)
+            {
+                return StringName.Empty;
+            }
+
+            return new StringName(firstTypeSymbolDeclaredInDocument.Name);
+        }
+    }
+
     protected override bool _OverridesExternalEditor()
     {
         var editorSettings = EditorInterface.Singleton.GetEditorSettings();
