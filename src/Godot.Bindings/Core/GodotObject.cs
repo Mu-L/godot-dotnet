@@ -2,6 +2,7 @@ using System;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Runtime.InteropServices;
+using System.Threading;
 using Godot.Bridge;
 using Godot.NativeInterop;
 using Godot.NativeInterop.Marshallers;
@@ -11,61 +12,87 @@ namespace Godot;
 partial class GodotObject : IDisposable
 {
     internal nint NativePtr;
-    private readonly GCHandle _gcHandle;
+    internal readonly GCHandle GCHandle;
 
     private readonly WeakReference<GodotObject>? _weakReferenceToSelf;
 
+    private static readonly AsyncLocal<GodotObjectCreationOptions?> _creationOptions = new();
+
+    private bool _disposing;
     private bool _disposed;
 
     private readonly PropertyInfoList _properties = [];
     internal PropertyInfoList GetPropertyListStorage() => _properties;
 
-    /// <summary>
-    /// Constructs a <see cref="GodotObject"/> with the given <paramref name="nativePtr"/>.
-    /// </summary>
-    /// <param name="nativePtr">The pointer to the native object in the engine's side.</param>
-    protected internal GodotObject(nint nativePtr)
+    internal struct GodotObjectCreationOptions
     {
-        _gcHandle = GCHandle.Alloc(this, GCHandleType.Normal);
+        /// <summary>
+        /// Name of the built-in Godot class, not the user-defined type.
+        /// If the type is user-defined, this must be the name of its closest built-in ancestor.
+        /// </summary>
+        internal required StringName NativeClassName;
 
-        NativePtr = nativePtr;
+        /// <summary>
+        /// The pointer to the existing native instance to construct the managed object for,
+        /// or zero to create a new native instance.
+        /// This must always be zero, unless the object is being recreated from an existing
+        /// native instance (<see cref="GodotRegistry.Recreate_Native"/>).
+        /// </summary>
+        internal nint NativePtr;
 
-        // If this object is RefCounted, initialize the reference count.
-        if (this is RefCounted rc)
+        /// <summary>
+        /// Whether the instance binding is already bound to the native instance.
+        /// This must only be <see langword="true"/> when constructing from
+        /// <see cref="CreateBindingCallback_Native(void*, void*)"/> because the engine already bound it.
+        /// </summary>
+        internal bool InstanceBindingAlreadyBound;
+
+        /// <summary>
+        /// Whether to emit the <see cref="NotificationPostinitialize"/> notification.
+        /// This must be <see langword="true"/> to properly finish initialization of the object.
+        /// However, when constructing from <see cref="GodotRegistry.Create_Native(void*, bool)"/>,
+        /// it depends on the <c>notifyPostInitialize</c> parameter because the engine controls it.
+        /// </summary>
+        internal bool EmitPostInitializeNotification;
+
+        /// <summary>
+        /// If the type is a <see cref="RefCounted"/>, whether to call <see cref="RefCounted.InitRef"/>
+        /// after construction.
+        /// This must be <see langword="true"/> when creating new ref counted instances from C#.
+        /// </summary>
+        internal bool InitRef;
+    }
+
+    // IMPORTANT: This method relies on a static variable to pass the creation options to the constructor.
+    // This means recursive calls to Create() will not work as expected, and creating other GodotObjects
+    // from within a registered constructor method may lead to unexpected behavior. That's why it should
+    // be generally avoided unless you really know what you're doing.
+    internal static T Create<T>(Func<T> constructor, GodotObjectCreationOptions options) where T : GodotObject
+    {
+        try
         {
-            rc.InitRef();
+            _creationOptions.Value = options;
+            return constructor();
         }
+        finally
+        {
+            _creationOptions.Value = null;
+        }
+    }
 
+    private unsafe GodotObject(GodotObjectCreationOptions options)
+    {
+        GCHandle = GCHandle.Alloc(this, GCHandleType.Normal);
+        nint gcHandlePtr = GCHandle.ToIntPtr(GCHandle);
         _weakReferenceToSelf = DisposablesTracker.RegisterGodotObject(this);
 
-        PostInitialize();
-    }
+        Debug.Assert(options.NativeClassName is not null, "'NativeClassName' must be provided.");
 
-    /// <summary>
-    /// Constructs a <see cref="GodotObject"/> with the given <paramref name="nativeClassName"/>.
-    /// </summary>
-    /// <param name="nativeClassName">The name of the Godot engine class.</param>
-    private protected GodotObject(scoped NativeGodotStringName nativeClassName) : this(ConstructGodotObject(nativeClassName))
-    {
-        // We need to emit this notification manually to finish initialization of user-constructed objects.
-        // The nint constructor doesn't emit this notification because it's used when creating instances from
-        // marshalled objects that have already been initialized.
-        Notification((int)NotificationPostinitialize);
-    }
-
-    private static unsafe nint ConstructGodotObject(scoped NativeGodotStringName nativeClassName)
-    {
-        return (nint)GodotBridge.GDExtensionInterface.classdb_construct_object2(&nativeClassName);
-    }
-
-    /// <summary>
-    /// Constructs a new <see cref="GodotObject"/>.
-    /// </summary>
-    public GodotObject() : this(NativeName.NativeValue.DangerousSelfRef) { }
-
-    private unsafe void PostInitialize()
-    {
-        nint gcHandlePtr = GCHandle.ToIntPtr(_gcHandle);
+        NativePtr = options.NativePtr;
+        if (NativePtr == 0)
+        {
+            NativePtr = (nint)GodotBridge.GDExtensionInterface.classdb_construct_object2(options.NativeClassName.NativeValue.DangerousSelfRef.GetUnsafeAddress());
+        }
 
         if (IsUserDefinedType())
         {
@@ -73,15 +100,71 @@ partial class GodotObject : IDisposable
             GodotBridge.GDExtensionInterface.object_set_instance((void*)NativePtr, &extensionClassName, (void*)gcHandlePtr);
         }
 
-        GDExtensionInstanceBindingCallbacks bindingsCallbacks = default;
+        if (!options.InstanceBindingAlreadyBound)
+        {
+            var bindingCallbacks = GDExtensionInstanceBindingCallbacks.Default;
+            if (!IsUserDefinedType())
+            {
+                if (!InteropUtils.BindingCallbacks.TryGetValue(options.NativeClassName, out bindingCallbacks))
+                {
+                    throw new InvalidOperationException(SR.FormatInvalidOperation_BindingCallbacksNotFound(GetType()));
+                }
+            }
 
-        GodotBridge.GDExtensionInterface.object_set_instance_binding((void*)NativePtr, GodotBridge.LibraryPtr, (void*)gcHandlePtr, &bindingsCallbacks);
+            GodotBridge.GDExtensionInterface.object_set_instance_binding((void*)NativePtr, GodotBridge.LibraryPtr, (void*)gcHandlePtr, &bindingCallbacks);
+        }
+
+        if (options.EmitPostInitializeNotification)
+        {
+            Notification((int)NotificationPostinitialize);
+        }
+
+        if (this is RefCounted refCounted && options.InitRef)
+        {
+            refCounted.InitRef();
+        }
 
         bool IsUserDefinedType()
         {
             // If this type is not defined in this assembly, it must be a user-defined type.
             return GetType().Assembly != typeof(GodotObject).Assembly;
         }
+    }
+
+    /// <summary>
+    /// Constructs a <see cref="GodotObject"/> with the given <paramref name="nativeClassName"/>.
+    /// </summary>
+    /// <param name="nativeClassName">The name of the Godot engine class.</param>
+    private protected GodotObject(StringName nativeClassName) : this(GetCreationOptions() ?? new GodotObjectCreationOptions()
+    {
+        NativeClassName = nativeClassName,
+        EmitPostInitializeNotification = true,
+        InitRef = true,
+    })
+    { }
+
+    /// <summary>
+    /// Constructs a new <see cref="GodotObject"/>.
+    /// </summary>
+    public GodotObject() : this(GetCreationOptions() ?? new GodotObjectCreationOptions()
+    {
+        NativeClassName = NativeName,
+        EmitPostInitializeNotification = true,
+        InitRef = true,
+    })
+    { }
+
+    private static GodotObjectCreationOptions? GetCreationOptions()
+    {
+        var creationOptions = _creationOptions.Value;
+
+        if (creationOptions is not null)
+        {
+            _creationOptions.Value = null;
+            return creationOptions;
+        }
+
+        return null;
     }
 
     /// <summary>
@@ -191,20 +274,70 @@ partial class GodotObject : IDisposable
     /// </summary>
     protected virtual unsafe void Dispose(bool disposing)
     {
-        if (_disposed)
+        if (_disposing || _disposed)
         {
             return;
         }
 
-        _disposed = true;
+        // IMPORTANT: We set '_disposing' to true very early to avoid re-entrancy issues.
+        // The free/destroy methods below may trigger a callback that tries to dispose again.
+        // However, '_disposed' must only be set to true at the end, because the 'Unreference'
+        // method checks if the object is already disposed and would throw.
+        _disposing = true;
 
         if (NativePtr != 0)
         {
+            nint nativePtr = NativePtr;
             GodotBridge.GDExtensionInterface.object_free_instance_binding((void*)NativePtr, GodotBridge.LibraryPtr);
 
-            _gcHandle.Free();
+            if (this is RefCounted rc)
+            {
+                // If this object is RefCounted, decrease the reference count.
+                // The previous call to `object_free_instance_binding` will have cleared `NativePtr`,
+                // we need to restore it for the `Unreference` call.
+                NativePtr = nativePtr;
+                if (rc.Unreference())
+                {
+                    // If the reference count reached zero, we need to free the native instance.
+                    GodotBridge.GDExtensionInterface.object_destroy((void*)NativePtr);
+                }
+            }
+
             NativePtr = 0;
         }
+
+        _disposed = true;
+
+        if (_weakReferenceToSelf is not null)
+        {
+            DisposablesTracker.UnregisterGodotObject(_weakReferenceToSelf);
+        }
+    }
+
+    /// <summary>
+    /// Destroyes the <see cref="GodotObject"/> instance in the Godot engine.
+    /// </summary>
+    /// <exception cref="InvalidOperationException">
+    /// Object is a <see cref="RefCounted"/> and cannot be freed manually.
+    /// </exception>
+    public unsafe void Free()
+    {
+        if (this is RefCounted)
+        {
+            throw new InvalidOperationException("RefCounted objects are freed automatically when their reference count reaches zero.");
+        }
+
+        ObjectDisposedException.ThrowIf(_disposing || _disposed, this);
+
+        _disposing = true;
+
+        if (NativePtr != 0)
+        {
+            GodotBridge.GDExtensionInterface.object_destroy((void*)NativePtr);
+            NativePtr = 0;
+        }
+
+        _disposed = true;
 
         if (_weakReferenceToSelf is not null)
         {

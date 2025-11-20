@@ -5,6 +5,7 @@ using Godot.Bridge;
 using Godot.EditorIntegration.Build.UI;
 using Godot.EditorIntegration.Export;
 using Godot.EditorIntegration.Internals;
+using Godot.NativeInterop;
 
 [assembly: DisableRuntimeMarshalling]
 [assembly: DisableGodotEntryPointGeneration]
@@ -33,6 +34,14 @@ internal static class Main
 
     public static void DeinitializeTypes(InitializationLevel level)
     {
+        if (level != InitializationLevel.Editor)
+        {
+            return;
+        }
+
+        GodotRegistry.RemoveAllEditorPlugins();
+        GodotRegistry.UnregisterAllClasses();
+        DisposablesTracker.DisposeAll();
     }
 
     // Initialization

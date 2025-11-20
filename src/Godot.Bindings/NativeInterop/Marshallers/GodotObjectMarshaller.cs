@@ -28,24 +28,38 @@ internal unsafe class GodotObjectMarshaller
         if (instance is not null)
         {
             var gcHandle = GCHandle.FromIntPtr((nint)instance);
-            return (GodotObject?)gcHandle.Target;
+            var target = (GodotObject?)gcHandle.Target;
+            if (target is RefCounted refCounted)
+            {
+                refCounted.Unreference();
+            }
+            return target;
         }
 
-        // Otherwise, try to look up the create helper.
+        // Otherwise, try to look up the correct binding callbacks.
         NativeGodotStringName nativeClassName = default;
+        GDExtensionInstanceBindingCallbacks bindingCallbacks;
         if (GodotBridge.GDExtensionInterface.object_get_class_name((void*)nativePtr, GodotBridge.LibraryPtr, nativeClassName.GetUnsafeAddress()))
         {
-            using StringName nativeClassNameManaged = StringName.CreateCopying(nativeClassName);
-            Debug.Assert(InteropUtils.CreateHelpers.ContainsKey(nativeClassNameManaged), $"Create helper for class named '{nativeClassNameManaged}' not found.");
-            if (InteropUtils.CreateHelpers.TryGetValue(nativeClassNameManaged, out var createHelper))
+            var lookup = InteropUtils.BindingCallbacks.GetAlternateLookup<NativeGodotStringName>();
+            if (!lookup.TryGetValue(nativeClassName, out bindingCallbacks))
             {
-                return createHelper(nativePtr);
+                Debug.Fail($"Binding callbacks for '{StringName.CreateTakingOwnership(nativeClassName)}' not found.");
+                bindingCallbacks = GodotObject.BindingCallbacks;
             }
         }
+        else
+        {
+            bindingCallbacks = GodotObject.BindingCallbacks;
+        }
 
-        // We couldn't find an existing C# instance or create helper.
-        // We'll just create a GodotObject instance since that should always be a common ancestor.
-        return new GodotObject(nativePtr);
+        {
+            instance = GodotBridge.GDExtensionInterface.object_get_instance_binding((void*)nativePtr, GodotBridge.LibraryPtr, &bindingCallbacks);
+            Debug.Assert(instance is not null, "Instance binding should have been created by now.");
+            var gcHandle = GCHandle.FromIntPtr((nint)instance);
+            var target = (GodotObject?)gcHandle.Target;
+            return target;
+        }
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
