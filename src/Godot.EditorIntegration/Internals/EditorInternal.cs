@@ -18,6 +18,8 @@ internal static partial class EditorInternal
     {
         _getProcAddress = (GetProcAddressFunction)getProcAddress;
 
+        _module_fail_initialization = (delegate* unmanaged[Cdecl]<NativeGodotString*, void>)LoadProcAddress("module_fail_initialization"u8);
+        _module_complete_initialization = (delegate* unmanaged[Cdecl]<void>)LoadProcAddress("module_complete_initialization"u8);
         _get_editor_assemblies_path = (delegate* unmanaged[Cdecl]<NativeGodotString*, void>)LoadProcAddress("get_editor_assemblies_path"u8);
         _get_project_assemblies_path = (delegate* unmanaged[Cdecl]<NativeGodotString*, void>)LoadProcAddress("get_project_assemblies_path"u8);
         _get_project_output_path = (delegate* unmanaged[Cdecl]<NativeGodotString*, NativeGodotString*, void>)LoadProcAddress("get_project_output_path"u8);
@@ -39,6 +41,9 @@ internal static partial class EditorInternal
         _editor_def = (delegate* unmanaged[Cdecl]<NativeGodotString*, NativeGodotVariant*, bool, NativeGodotVariant*, void>)LoadProcAddress("editor_def"u8);
         _editor_def_shortcut = (delegate* unmanaged[Cdecl]<NativeGodotString*, NativeGodotString*, long, bool, nint*, void>)LoadProcAddress("editor_def_shortcut"u8);
         _editor_shortcut_override = (delegate* unmanaged[Cdecl]<NativeGodotString*, NativeGodotString*, long, bool, void>)LoadProcAddress("editor_shortcut_override"u8);
+
+        _set_dotnet_sdk_info = (delegate* unmanaged[Cdecl]<NativeGodotString*, NativeGodotString*, void>)LoadProcAddress("set_dotnet_sdk_info"u8);
+        _set_editor_integration_version = (delegate* unmanaged[Cdecl]<NativeGodotString*, void>)LoadProcAddress("set_editor_integration_version"u8);
     }
 
     private static unsafe nint LoadProcAddress(ReadOnlySpan<byte> nameUtf8)

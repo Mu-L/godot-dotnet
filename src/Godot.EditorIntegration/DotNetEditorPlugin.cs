@@ -1,6 +1,7 @@
 using System;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Threading;
 using Godot.Bridge;
 using Godot.Collections;
@@ -185,7 +186,15 @@ internal sealed partial class DotNetEditorPlugin : EditorPlugin
 
         // Register MSBuildLocator defaults so ProjectUtils can create/edit projects.
         // This must be done before ProjectUtils is used for the first time.
-        ProjectUtils.MSBuildLocatorRegisterDefaults();
+        if (ProjectUtils.MSBuildLocatorTryRegisterDefaults(out string? sdkVersion, out string? sdkPath))
+        {
+            EditorInternal.SetDotNetSdkInfo(sdkVersion, sdkPath);
+        }
+        else
+        {
+            EditorInternal.ModuleFailInitialization("Unable to find valid .NET SDK.");
+            return;
+        }
 
         _editorSettings = EditorInterface.Singleton.GetEditorSettings();
 
@@ -320,6 +329,18 @@ internal sealed partial class DotNetEditorPlugin : EditorPlugin
         _sourceCodePlugin = new DotNetEditorExtensionSourceCodePlugin();
 
         CodeEditorManager = new CodeEditorManagers();
+
+        {
+            var assembly = typeof(DotNetEditorPlugin).Assembly;
+            var assemblyInformationalVersionAttribute = assembly.GetCustomAttribute<AssemblyInformationalVersionAttribute>();
+            string? informationalVersion = assemblyInformationalVersionAttribute?.InformationalVersion;
+            if (!string.IsNullOrEmpty(informationalVersion))
+            {
+                EditorInternal.SetEditorIntegrationVersion(informationalVersion);
+            }
+        }
+
+        EditorInternal.ModuleCompleteInitialization();
     }
 
     private void RunUpgradeAssistant()

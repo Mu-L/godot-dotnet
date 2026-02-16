@@ -1,4 +1,5 @@
 using System;
+using System.Diagnostics.CodeAnalysis;
 using Godot.Bridge;
 using Microsoft.Build.Construction;
 using Microsoft.Build.Evaluation;
@@ -10,9 +11,22 @@ internal static class ProjectUtils
 {
     private const string GodotMSBuildSdk = "Godot.NET.Sdk";
 
-    public static void MSBuildLocatorRegisterDefaults()
+    public static bool MSBuildLocatorTryRegisterDefaults([NotNullWhen(true)] out string? version, [NotNullWhen(true)] out string? path)
     {
-        MSBuildLocator.RegisterDefaults();
+        try
+        {
+            var instance = MSBuildLocator.RegisterDefaults();
+            version = instance.Version.ToString();
+            path = instance.MSBuildPath;
+            return true;
+        }
+        catch
+        {
+            // We could not find a valid MSBuild instance.
+            version = null;
+            path = null;
+            return false;
+        }
     }
 
     public static ProjectRootElement GenerateProject(string projectName)

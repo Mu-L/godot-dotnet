@@ -8,6 +8,23 @@ namespace Godot.EditorIntegration.Internals;
 
 unsafe partial class EditorInternal
 {
+    private static delegate* unmanaged[Cdecl]<NativeGodotString*, void> _module_fail_initialization;
+
+    public static void ModuleFailInitialization(string errorMessage)
+    {
+        Debug.Assert(_module_fail_initialization is not null);
+        using NativeGodotString errorMessageNative = NativeGodotString.Create(errorMessage);
+        _module_fail_initialization(&errorMessageNative);
+    }
+
+    private static delegate* unmanaged[Cdecl]<void> _module_complete_initialization;
+
+    public static void ModuleCompleteInitialization()
+    {
+        Debug.Assert(_module_complete_initialization is not null);
+        _module_complete_initialization();
+    }
+
     private static delegate* unmanaged[Cdecl]<NativeGodotString*, void> _get_editor_assemblies_path;
 
     public static string GetEditorAssembliesPath()
@@ -191,5 +208,24 @@ unsafe partial class EditorInternal
         using NativeGodotString pathNative = NativeGodotString.Create(path);
         using NativeGodotString featureNative = NativeGodotString.Create(feature);
         _editor_shortcut_override(&pathNative, &featureNative, (long)keycode, physical);
+    }
+
+    private static delegate* unmanaged[Cdecl]<NativeGodotString*, NativeGodotString*, void> _set_dotnet_sdk_info;
+
+    public static void SetDotNetSdkInfo(string version, string path)
+    {
+        Debug.Assert(_set_dotnet_sdk_info is not null);
+        using NativeGodotString versionNative = NativeGodotString.Create(version);
+        using NativeGodotString pathNative = NativeGodotString.Create(path);
+        _set_dotnet_sdk_info(&versionNative, &pathNative);
+    }
+
+    private static delegate* unmanaged[Cdecl]<NativeGodotString*, void> _set_editor_integration_version;
+
+    public static void SetEditorIntegrationVersion(string version)
+    {
+        Debug.Assert(_set_editor_integration_version is not null);
+        using NativeGodotString versionNative = NativeGodotString.Create(version);
+        _set_editor_integration_version(&versionNative);
     }
 }
