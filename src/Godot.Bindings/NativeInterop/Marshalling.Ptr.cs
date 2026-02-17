@@ -694,6 +694,7 @@ partial class Marshalling
                 return default!;
             }
 
+            bool initRef = false;
             if (typeof(RefCounted).IsAssignableFrom(typeof(T)))
             {
                 // In virtual methods, if T is RefCounted we need to use `ref_get_object` to get
@@ -712,6 +713,11 @@ partial class Marshalling
                 if (refPtr is not null)
                 {
                     value = refPtr;
+                    // When the parameter type is not RefCounted or derived in the ClassDB binding,
+                    // we'll be receiveing a pointer to the RefCounted instead of Ref<T>, but in C#
+                    // we treat all RefCounted instances as Ref<T>, so we need to call InitRef()
+                    // to simulate storing the pointer in a Ref<T>.
+                    initRef = true;
                 }
                 else
                 {
@@ -721,7 +727,7 @@ partial class Marshalling
                 }
             }
 
-            return (T)(object)GodotObjectMarshaller.GetOrCreateManagedInstance((nint)value)!;
+            return (T)(object)GodotObjectMarshaller.GetOrCreateManagedInstance((nint)value, initRef)!;
         }
 
         // `typeof(T).IsEnum` is optimized away.

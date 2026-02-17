@@ -13,10 +13,15 @@ internal unsafe class GodotObjectMarshaller
     /// for the unmanaged instance referenced by the native pointer.
     /// </summary>
     /// <param name="nativePtr">Pointer to the unmanaged <see cref="GodotObject"/> instance.</param>
+    /// <param name="initRef">
+    /// Whether to call <see cref="RefCounted.InitRef"/> on the newly created instance.
+    /// This is only needed when creating new <see cref="RefCounted"/> instances from Variant conversions,
+    /// and should be <see langword="false"/> in all other cases.
+    /// </param>
     /// <returns>
     /// A managed <see cref="GodotObject"/> instance that represents the unmanaged instance in C#.
     /// </returns>
-    internal static GodotObject? GetOrCreateManagedInstance(nint nativePtr)
+    internal static GodotObject? GetOrCreateManagedInstance(nint nativePtr, bool initRef = false)
     {
         if (nativePtr == 0)
         {
@@ -29,10 +34,6 @@ internal unsafe class GodotObjectMarshaller
         {
             var gcHandle = GCHandle.FromIntPtr((nint)instance);
             var target = (GodotObject?)gcHandle.Target;
-            if (target is RefCounted refCounted)
-            {
-                refCounted.Unreference();
-            }
             return target;
         }
 
@@ -58,6 +59,10 @@ internal unsafe class GodotObjectMarshaller
             Debug.Assert(instance is not null, "Instance binding should have been created by now.");
             var gcHandle = GCHandle.FromIntPtr((nint)instance);
             var target = (GodotObject?)gcHandle.Target;
+            if (target is RefCounted refCounted && initRef)
+            {
+                refCounted.InitRef();
+            }
             return target;
         }
     }

@@ -417,7 +417,7 @@ public partial struct Variant : IDisposable
     public readonly GodotObject? AsGodotObject()
     {
         nint nativePtr = NativeGodotVariant.ConvertToObject(NativeValue.DangerousSelfRef);
-        return GodotObjectMarshaller.GetOrCreateManagedInstance(nativePtr);
+        return GodotObjectMarshaller.GetOrCreateManagedInstance(nativePtr, initRef: true);
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -895,7 +895,7 @@ public partial struct Variant : IDisposable
     public static implicit operator Variant(GodotObject? from)
     {
         nint nativePtr = GodotObject.GetNativePtr(from);
-        return CreateTakingOwnership(NativeGodotVariant.CreateFromObject(nativePtr));
+        return CreateCopying(NativeGodotVariant.CreateFromObject(nativePtr));
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]

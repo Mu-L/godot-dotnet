@@ -590,7 +590,7 @@ partial class Marshalling
 
         if (typeof(GodotObject).IsAssignableFrom(typeof(T)))
         {
-            return (T)(object)GodotObjectMarshaller.GetOrCreateManagedInstance(NativeGodotVariant.ConvertToObject(value))!;
+            return (T)(object)GodotObjectMarshaller.GetOrCreateManagedInstance(NativeGodotVariant.ConvertToObject(value), initRef: true)!;
         }
 
         // `typeof(T).IsEnum` is optimized away.
