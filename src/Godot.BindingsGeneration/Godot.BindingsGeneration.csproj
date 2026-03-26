@@ -25,6 +25,7 @@
   <ItemGroup>
     <PackageReference Include="ClangSharp" Version="$(ClangSharpVersion)" />
     <PackageReference Include="ClangSharp.PInvokeGenerator" Version="$(ClangSharpVersion)" />
+    <PackageReference Include="NuGet.Versioning" Version="$(NuGetVersioningVersion)" />
   </ItemGroup>
 
 </Project>

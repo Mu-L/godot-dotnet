@@ -37,6 +37,12 @@ public class GenerateTask : Task
     public string? TestOutputPath { get; set; }
 
     /// <summary>
+    /// When enabled, the task will enforce that the API version matches
+    /// the version of the Godot .NET packages.
+    /// </summary>
+    public bool ValidateBindingsVersion { get; set; }
+
+    /// <summary>
     /// Execute the MSBuild task.
     /// </summary>
     /// <returns><see langword="true"/> if the task was successful.</returns>
@@ -70,7 +76,12 @@ public class GenerateTask : Task
 
             Log.LogMessage(MessageImportance.High, $"Generating C# bindings for '{api.Header.VersionFullName}'.");
 
-            BindingsGenerator.Generate(api, OutputPath, TestOutputPath, logger: logger);
+            BindingsGeneratorOptions options = new()
+            {
+                ValidateBindingsVersion = ValidateBindingsVersion,
+            };
+
+            BindingsGenerator.Generate(api, OutputPath, TestOutputPath, options, logger);
 
             return !Log.HasLoggedErrors;
         }

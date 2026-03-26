@@ -3,9 +3,11 @@ using System.CodeDom.Compiler;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 using Godot.BindingsGeneration.ApiDump;
 using Godot.BindingsGeneration.Reflection;
 using Godot.BindingsGeneration.Logging;
+using NuGet.Versioning;
 
 namespace Godot.BindingsGeneration;
 
@@ -15,6 +17,35 @@ internal static partial class BindingsGenerator
     {
         options ??= new();
         logger ??= ConsoleLogger.Instance;
+
+        // Validate that the API version matches the Godot .NET packages version.
+        if (options.ValidateBindingsVersion)
+        {
+            var assembly = typeof(BindingsGenerator).Assembly;
+            var assemblyInformationalVersionAttribute = assembly.GetCustomAttribute<AssemblyInformationalVersionAttribute>();
+            string? informationalVersion = assemblyInformationalVersionAttribute?.InformationalVersion;
+            if (string.IsNullOrEmpty(informationalVersion))
+            {
+                logger.LogError("Could not determine the version of the Godot .NET packages.");
+                return;
+            }
+
+            if (!NuGetVersion.TryParse(informationalVersion, out var parsedVersion))
+            {
+                logger.LogError($"Could not parse the version of the Godot .NET packages from '{informationalVersion}'.");
+                return;
+            }
+
+            if (api.Header.VersionMajor != parsedVersion.Major
+             || api.Header.VersionMinor != parsedVersion.Minor
+             || api.Header.VersionPatch != parsedVersion.Patch)
+            {
+                logger.LogError($"API version '{api.Header.VersionFullName}' does not match the version of the Godot .NET packages '{parsedVersion}'.");
+                return;
+            }
+
+            // We leave some wiggle room for the revision and pre-release labels, as they don't necessarily need to match and can be different for different builds (e.g. CI builds vs local builds). It also allows you to build a prerelease version of the Godot .NET packages against a stable Godot release.
+        }
 
         // Validate that the requested precision matches the API.
         var apiPrecision = api.Header.Precision;
@@ -86,7 +117,7 @@ internal static partial class BindingsGenerator
         }
     }
 
-    private static void WriteType(IndentedTextWriter writer, TypeInfo type)
+    private static void WriteType(IndentedTextWriter writer, Reflection.TypeInfo type)
     {
         if (type is DelegateInfo delegateType)
         {

@@ -16,10 +16,16 @@
     <Description>.NET bindings for the Godot game engine.</Description>
   </PropertyGroup>
 
-  <!-- TODO: This should be uncommented to make it true by default, but make sure the task is incremental first. -->
-  <!-- <PropertyGroup>
-    <GenerateGodotBindings>true</GenerateGodotBindings>
-  </PropertyGroup> -->
+  <PropertyGroup>
+    <!-- TODO: This should be uncommented to make it true by default, but make sure the task is incremental first. -->
+    <!-- <GenerateGodotBindings>true</GenerateGodotBindings> -->
+
+    <!--
+      Version validation is only enabled by default for official builds.
+      It can be overridden by setting the 'ValidateBindingsVersion' property.
+    -->
+    <ValidateBindingsVersion Condition="'$(ValidateBindingsVersion)' == ''">$(OfficialBuild)</ValidateBindingsVersion>
+  </PropertyGroup>
 
   <ItemGroup>
     <InternalsVisibleTo Include="Godot.EditorIntegration" />
@@ -51,7 +57,8 @@
     <GenerateTask ExtensionApiPath="$(RepoRoot)gdextension\extension_api.json"
                   ExtensionInterfacePath="$(RepoRoot)gdextension\gdextension_interface.h"
                   OutputPath="$(MSBuildThisFileDirectory)Generated"
-                  TestOutputPath="$(RepoRoot)tests\Godot.Bindings.Tests\Generated" />
+                  TestOutputPath="$(RepoRoot)tests\Godot.Bindings.Tests\Generated"
+                  ValidateBindingsVersion="$(ValidateBindingsVersion)" />
     <ItemGroup>
       <Compile Include="$(MSBuildThisFileDirectory)Generated\**\*.cs" />
     </ItemGroup>
