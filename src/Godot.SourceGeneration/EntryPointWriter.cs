@@ -17,7 +17,8 @@ internal static class EntryPointWriter
         sb.AppendLine("#nullable enable");
         sb.AppendLine();
 
-        sb.AppendLine($"namespace {spec.Name};");
+        string namespaceName = IdentifierUtils.SanitizeName(spec.Name, escapeSegments: true);
+        sb.AppendLine($"namespace {namespaceName};");
         sb.AppendLine();
 
         if (!spec.DisableGodotEntryPointGeneration)

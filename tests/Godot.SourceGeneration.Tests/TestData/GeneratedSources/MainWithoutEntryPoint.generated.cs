@@ -1,6 +1,6 @@
 #nullable enable
 
-namespace TestProject;
+namespace @TestProject;
 
 internal static class ClassDBExtensions
 {

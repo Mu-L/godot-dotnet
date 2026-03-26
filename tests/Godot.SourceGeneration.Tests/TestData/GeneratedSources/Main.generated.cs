@@ -2,7 +2,7 @@
 
 #nullable enable
 
-namespace TestProject;
+namespace @TestProject;
 
 static partial class Main
 {
