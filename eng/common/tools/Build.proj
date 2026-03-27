@@ -112,6 +112,7 @@
     <ItemGroup Condition="'$(Restore)' == 'true'">
       <_RestoreToolsProps Include="@(_CommonProps)" />
       <_RestoreToolsProps Include="BaseIntermediateOutputPath=$(ArtifactsToolsetDir)Common\" />
+      <_RestoreToolsProps Include="PublishDir=$(ArtifactsToolsetDir)Common\$(Configuration)\net\" />
       <_RestoreToolsProps Include="ExcludeRestorePackageImports=true" />
     </ItemGroup>
 
@@ -129,7 +130,7 @@
       Restore built-in tools.
     -->
     <MSBuild Projects="$(RepositoryEngineeringDir)common\tasks\Tasks.csproj"
-             Targets="Restore;Build"
+             Targets="Restore;Build;Publish"
              Properties="@(_RestoreToolsProps)"
              Condition="'$(Restore)' == 'true'" />
 

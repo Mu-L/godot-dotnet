@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>net9.0</TargetFramework>
+    <TargetFramework>$(NetCurrent)</TargetFramework>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <IsTrimmable>true</IsTrimmable>
     <IsAotCompatible>true</IsAotCompatible>
@@ -36,7 +36,7 @@
     This avoids issues when the MSBuild process is long-lived (i.e. /nodeReuse:true).
     See https://github.com/rainersigwald/build-task-in-solution-demo.
   -->
-  <UsingTask TaskName="Godot.BindingsGenerator.GenerateTask" AssemblyFile="$(ArtifactsBinDir)\Godot.BindingsGenerator\$(Configuration)\net9.0\Godot.BindingsGenerator.dll" TaskFactory="TaskHostFactory" />
+  <UsingTask TaskName="Godot.BindingsGenerator.GenerateTask" AssemblyFile="$(ArtifactsBinDir)\Godot.BindingsGenerator\$(Configuration)\$(NetCurrent)\Godot.BindingsGenerator.dll" TaskFactory="TaskHostFactory" />
 
   <!-- Generate the bindings before building the project. -->
   <ItemGroup Condition="'$(GenerateGodotBindings)' == 'true'">
