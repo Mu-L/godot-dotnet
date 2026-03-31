@@ -23,13 +23,6 @@ indent_size = 4
 indent_style = space
 indent_size = 2
 
-[*.{sln,csproj}]
-end_of_line = crlf
-charset = utf-8-bom
-
-[*.sln]
-indent_style = tab
-
 [*.{slnx,csproj,proj,projitems,props,targets,nuspec,resx}]
 indent_style = space
 indent_size = 2
