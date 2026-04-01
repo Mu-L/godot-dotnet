@@ -31,6 +31,10 @@
     <ProjectReference Include="..\Godot.BindingsGenerator\Godot.BindingsGenerator.csproj" ReferenceOutputAssembly="false" />
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\Godot.Analyzers\Godot.Analyzers.csproj" ReferenceOutputAssembly="false" OutputItemType="Analyzer" />
+  </ItemGroup>
+
   <!--
     TaskHostFactory ensures that the GenerateTasks assembly is always loaded in an isolated process.
     This avoids issues when the MSBuild process is long-lived (i.e. /nodeReuse:true).
