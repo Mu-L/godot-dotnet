@@ -11,7 +11,7 @@ using Godot.Common;
 using Godot.Common.CodeAnalysis;
 using Godot.EditorIntegration.CodeEditors;
 using Godot.EditorIntegration.Internals;
-using Godot.EditorIntegration.Utils;
+using Godot.EditorIntegration.Workspace;
 using Godot.NativeInterop;
 using Godot.NativeInterop.Marshallers;
 using Microsoft.CodeAnalysis;
@@ -26,6 +26,10 @@ internal sealed partial class DotNetEditorExtensionSourceCodePlugin : EditorExte
 {
     private bool _disposed;
 
+    private readonly DotNetWorkspace _workspace;
+
+    internal DotNetWorkspace Workspace => _workspace;
+
     private struct ParsedTemplateFile
     {
         public string Name { get; set; }
@@ -38,6 +42,8 @@ internal sealed partial class DotNetEditorExtensionSourceCodePlugin : EditorExte
 
     public DotNetEditorExtensionSourceCodePlugin()
     {
+        _workspace = DotNetWorkspace.Create(EditorPath.ProjectCSProjPath);
+
         EditorInternal.RegisterDotNetSourceCodePlugin(this);
     }
 
@@ -45,7 +51,8 @@ internal sealed partial class DotNetEditorExtensionSourceCodePlugin : EditorExte
     {
         try
         {
-            return GetSourcePathCoreAsync(className.ToString()).Result;
+            ThrowIfWorkspaceNotAvailable();
+            return GetSourcePathCore(_workspace, className.ToString());
         }
         catch (Exception e)
         {
@@ -53,15 +60,12 @@ internal sealed partial class DotNetEditorExtensionSourceCodePlugin : EditorExte
             return "";
         }
 
-        static async Task<string> GetSourcePathCoreAsync(string className, CancellationToken cancellationToken = default)
+        static string GetSourcePathCore(DotNetWorkspace workspace, string className)
         {
-            using var workspace = await DotNetWorkspace.OpenAsync(EditorPath.ProjectCSProjPath, cancellationToken).ConfigureAwait(false);
-            var symbolCandidates = workspace.FindTypeSymbols(className);
-
             // There can't be multiple symbols with the same name registered in Godot,
             // so if we found more than one symbol, we are in an invalid state and we
             // can just return an empty string.
-            var symbol = symbolCandidates.SingleOrDefault();
+            var symbol = workspace.FindTypeSymbols(className).SingleOrDefault();
             if (symbol is null)
             {
                 return "";
@@ -81,7 +85,8 @@ internal sealed partial class DotNetEditorExtensionSourceCodePlugin : EditorExte
     {
         try
         {
-            return GetLocationInSourceCore(className.ToString(), methodName.ToString(), (NativeGodotString*)rSourcePath, rLine, rColumn);
+            ThrowIfWorkspaceNotAvailable();
+            return GetLocationInSourceCore(_workspace, className.ToString(), methodName.ToString(), (NativeGodotString*)rSourcePath, rLine, rColumn);
         }
         catch (Exception e)
         {
@@ -89,10 +94,8 @@ internal sealed partial class DotNetEditorExtensionSourceCodePlugin : EditorExte
             return false;
         }
 
-        static bool GetLocationInSourceCore(string className, string methodName, NativeGodotString* rSourcePath, int* rLine, int* rColumn, CancellationToken cancellationToken = default)
+        static bool GetLocationInSourceCore(DotNetWorkspace workspace, string className, string methodName, NativeGodotString* rSourcePath, int* rLine, int* rColumn, CancellationToken cancellationToken = default)
         {
-            using var workspace = DotNetWorkspace.OpenAsync(EditorPath.ProjectCSProjPath, cancellationToken).Result;
-
             // There can't be multiple symbols with the same name registered in Godot,
             // so if we found more than one symbol, we are in an invalid state and we
             // can just return false.
@@ -149,7 +152,8 @@ internal sealed partial class DotNetEditorExtensionSourceCodePlugin : EditorExte
     {
         try
         {
-            return GetClassNameFromSourcePathCoreAsync(sourcePath).Result;
+            ThrowIfWorkspaceNotAvailable();
+            return GetClassNameFromSourcePathCore(_workspace, sourcePath);
         }
         catch (Exception e)
         {
@@ -157,9 +161,8 @@ internal sealed partial class DotNetEditorExtensionSourceCodePlugin : EditorExte
             return StringName.Empty;
         }
 
-        static async Task<StringName> GetClassNameFromSourcePathCoreAsync(string sourcePath, CancellationToken cancellationToken = default)
+        static StringName GetClassNameFromSourcePathCore(DotNetWorkspace workspace, string sourcePath)
         {
-            using var workspace = await DotNetWorkspace.OpenAsync(EditorPath.ProjectCSProjPath, cancellationToken).ConfigureAwait(false);
             var document = workspace.GetDocumentForFilePath(sourcePath);
             if (document is null)
             {
@@ -167,35 +170,46 @@ internal sealed partial class DotNetEditorExtensionSourceCodePlugin : EditorExte
                 return StringName.Empty;
             }
 
-            var syntaxRoot = await document.GetSyntaxRootAsync(cancellationToken).ConfigureAwait(false);
-            if (syntaxRoot is null)
+            if (!workspace.TryGetCachedTypeSymbolsForDocument(document.Id, out var cachedSymbols))
             {
+                // The document has no type symbols or the cache is outdated.
+                // This is unlikely to happen because the cache should be updated on every change.
                 return StringName.Empty;
             }
 
-            var semanticModel = await document.GetSemanticModelAsync(cancellationToken).ConfigureAwait(false);
-            if (semanticModel is null)
-            {
-                return StringName.Empty;
-            }
+            // Try to get the syntax tree from the document to use when checking if a symbol
+            // belongs to this file and avoid comparing file paths which can be unreliable
+            // (e.g. due to case sensitivity or symbolic links).
+            // If the syntax tree is not available, we will fall back to comparing file paths,
+            // but it should be rare because we always create a compilation when loading the workspace.
+            document.TryGetSyntaxTree(out var documentSyntaxTree);
+
+            // Sort symbols by their declaration position within the file,
+            // so that we always get the same one if there are multiple.
+            var sortedTypeSymbols = cachedSymbols
+                .Select(symbol =>
+                {
+                    var syntaxReferences = symbol.DeclaringSyntaxReferences;
+                    foreach (var syntaxReference in syntaxReferences)
+                    {
+                        bool isInDocument = documentSyntaxTree is not null
+                            ? syntaxReference.SyntaxTree == documentSyntaxTree
+                            : string.Equals(syntaxReference.SyntaxTree.FilePath, document.FilePath, StringComparison.Ordinal);
+
+                        if (isInDocument)
+                        {
+                            return (Symbol: symbol, Position: syntaxReference.Span.Start);
+                        }
+                    }
+                    return (Symbol: symbol, Position: int.MaxValue);
+                })
+                .Where(x => x.Position < int.MaxValue)
+                .OrderBy(x => x.Position)
+                .Select(x => x.Symbol);
 
             INamedTypeSymbol? firstTypeSymbolDeclaredInDocument = null;
-            var classDeclarationSyntaxes = syntaxRoot
-                .DescendantNodes()
-                .OfType<ClassDeclarationSyntax>();
-            foreach (var classDeclarationSyntax in classDeclarationSyntaxes)
+            foreach (var symbol in sortedTypeSymbols)
             {
-                var symbol = semanticModel.GetDeclaredSymbol(classDeclarationSyntax, cancellationToken);
-                if (symbol is null)
-                {
-                    continue;
-                }
-
-                if (!symbol.HasAttribute(KnownTypeNames.GodotClassAttribute))
-                {
-                    continue;
-                }
-
                 if (firstTypeSymbolDeclaredInDocument is null)
                 {
                     firstTypeSymbolDeclaredInDocument = symbol;
@@ -517,7 +531,8 @@ internal sealed partial class DotNetEditorExtensionSourceCodePlugin : EditorExte
     {
         try
         {
-            AddMethodFuncCoreAsync(className.ToString(), methodName, args).Wait();
+            ThrowIfWorkspaceNotAvailable();
+            AddMethodFuncCoreAsync(_workspace, className.ToString(), methodName, args).Wait();
             return Error.Ok;
         }
         catch (Exception e)
@@ -526,10 +541,8 @@ internal sealed partial class DotNetEditorExtensionSourceCodePlugin : EditorExte
             return Error.Unavailable;
         }
 
-        static async Task AddMethodFuncCoreAsync(string className, string methodName, PackedStringArray args, CancellationToken cancellationToken = default)
+        static async Task AddMethodFuncCoreAsync(DotNetWorkspace workspace, string className, string methodName, PackedStringArray args, CancellationToken cancellationToken = default)
         {
-            using var workspace = await DotNetWorkspace.OpenAsync(EditorPath.ProjectCSProjPath, cancellationToken).ConfigureAwait(false);
-
             var symbolCandidates = workspace.FindTypeSymbols(className);
 
             // There can't be multiple symbols with the same name registered in Godot,
@@ -763,7 +776,20 @@ internal sealed partial class DotNetEditorExtensionSourceCodePlugin : EditorExte
 
         _disposed = true;
 
+        if (disposing)
+        {
+            _workspace.Dispose();
+        }
+
         EditorInternal.UnregisterDotNetSourceCodePlugin(this);
         base.Dispose(disposing);
+    }
+
+    private void ThrowIfWorkspaceNotAvailable()
+    {
+        if (!_workspace.IsAvailable)
+        {
+            throw new InvalidOperationException("C# workspace is not available.");
+        }
     }
 }

@@ -1,6 +1,7 @@
 using System.Diagnostics;
 using System.Runtime.Versioning;
 using Godot.Collections;
+using Godot.EditorIntegration.Workspace;
 using Godot.NativeInterop;
 using Godot.NativeInterop.Marshallers;
 
@@ -23,6 +24,14 @@ unsafe partial class EditorInternal
     {
         Debug.Assert(_module_complete_initialization is not null);
         _module_complete_initialization();
+    }
+
+    private static delegate* unmanaged[Cdecl]<int, void> _module_set_workspace_state;
+
+    public static void ModuleSetWorkspaceState(DotNetWorkspaceState state)
+    {
+        Debug.Assert(_module_set_workspace_state is not null);
+        _module_set_workspace_state((int)state);
     }
 
     private static delegate* unmanaged[Cdecl]<NativeGodotString*, void> _get_editor_assemblies_path;

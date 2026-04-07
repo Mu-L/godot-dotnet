@@ -20,6 +20,7 @@ internal static partial class EditorInternal
 
         _module_fail_initialization = (delegate* unmanaged[Cdecl]<NativeGodotString*, void>)LoadProcAddress("module_fail_initialization"u8);
         _module_complete_initialization = (delegate* unmanaged[Cdecl]<void>)LoadProcAddress("module_complete_initialization"u8);
+        _module_set_workspace_state = (delegate* unmanaged[Cdecl]<int, void>)LoadProcAddress("module_set_workspace_state"u8);
         _get_editor_assemblies_path = (delegate* unmanaged[Cdecl]<NativeGodotString*, void>)LoadProcAddress("get_editor_assemblies_path"u8);
         _get_project_assemblies_path = (delegate* unmanaged[Cdecl]<NativeGodotString*, void>)LoadProcAddress("get_project_assemblies_path"u8);
         _get_project_output_path = (delegate* unmanaged[Cdecl]<NativeGodotString*, NativeGodotString*, void>)LoadProcAddress("get_project_output_path"u8);

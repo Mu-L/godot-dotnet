@@ -13,6 +13,7 @@ using Godot.EditorIntegration.Export;
 using Godot.EditorIntegration.Internals;
 using Godot.EditorIntegration.ProjectEditor;
 using Godot.EditorIntegration.UpgradeAssistant;
+using Godot.EditorIntegration.Workspace;
 using Microsoft.VisualStudio.SolutionPersistence.Model;
 using Microsoft.VisualStudio.SolutionPersistence.Serializer;
 
@@ -341,6 +342,32 @@ internal sealed partial class DotNetEditorPlugin : EditorPlugin
         }
 
         EditorInternal.ModuleCompleteInitialization();
+
+        // Handle .NET workspace initialization state.
+        // TODO(@raulsntos): We should check if the workspace is already initialized and what stage it's on, to update the status indicator and status panel accordingly. Regardless, we should also subscribe to an event to update the status when the initialization changes state (this can also happen when a reload is triggered which would mean discarding the current workspace and starting a new one).
+        ProjectSettings.Singleton.SettingsChanged += UpdateWorkspaceProjectPath;
+    }
+
+    private void UpdateWorkspaceProjectPath()
+    {
+        PackedStringArray changedSettings = ProjectSettings.Singleton.GetChangedSettings();
+
+        bool shouldUpdate = false;
+        foreach (string setting in changedSettings)
+        {
+            if (setting.StartsWith("dotnet/", StringComparison.Ordinal))
+            {
+                shouldUpdate = true;
+                break;
+            }
+        }
+        if (!shouldUpdate)
+        {
+            // No .NET-related settings were changed, so we can ignore this.
+            return;
+        }
+
+        _sourceCodePlugin.Workspace.UpdateProjectPath(EditorPath.ProjectCSProjPath);
     }
 
     private void RunUpgradeAssistant()
@@ -389,6 +416,8 @@ internal sealed partial class DotNetEditorPlugin : EditorPlugin
         // Export plugin.
         RemoveExportPlugin(_exportPlugin);
         _exportPlugin.Dispose();
+
+        ProjectSettings.Singleton.SettingsChanged -= UpdateWorkspaceProjectPath;
 
         // Source code plugin.
         _sourceCodePlugin.Dispose();
