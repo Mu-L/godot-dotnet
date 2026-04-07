@@ -110,7 +110,7 @@ internal static class BuildManager
                 ? options.RuntimeIdentifier
                 : RuntimeInformation.RuntimeIdentifier;
 
-            progress.Step(SR.FormatBuildProjectProgressStep(assemblyName, runtimeIdentifier));
+            progress.Step(SR.FormatBuildProjectProgressStep(assemblyName, runtimeIdentifier), 0);
             return BuildCore(options, DotNetCli.CreateBuildStartInfo);
         }))
         {
@@ -127,7 +127,7 @@ internal static class BuildManager
         {
             string assemblyName = Path.GetFileNameWithoutExtension(options.SlnOrProject);
 
-            progress.Step(SR.FormatCleanProjectProgressStep(assemblyName));
+            progress.Step(SR.FormatCleanProjectProgressStep(assemblyName), 0);
             return BuildCore(options, DotNetCli.CreateCleanStartInfo);
         }))
         {

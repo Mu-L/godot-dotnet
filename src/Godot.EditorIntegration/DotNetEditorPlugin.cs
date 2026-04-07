@@ -43,7 +43,7 @@ internal sealed partial class DotNetEditorPlugin : EditorPlugin
     {
         string? errorMessage = EditorProgress.Invoke("create_csharp_solution", SR.DotNetEditorPlugin_GenerateSolutionEditorProgressLabel, 2, progress =>
         {
-            progress.Step(SR.DotNetEditorPlugin_GenerateSolutionEditorProgressStep);
+            progress.Step(SR.DotNetEditorPlugin_GenerateSolutionEditorProgressStep, 0);
 
             string csprojDir = Path.GetDirectoryName(EditorPath.ProjectCSProjPath)!;
             string slnDir = Path.GetDirectoryName(EditorPath.ProjectSlnPath)!;
@@ -58,6 +58,8 @@ internal sealed partial class DotNetEditorPlugin : EditorPlugin
             {
                 return SR.FormatDotNetEditorPlugin_CreateCSharpProjectFailed(e.Message);
             }
+
+            progress.Step(SR.DotNetEditorPlugin_GenerateSolutionEditorProgressStep, 1);
 
             var solutionModel = new SolutionModel();
             solutionModel.AddPlatform("Any CPU");
