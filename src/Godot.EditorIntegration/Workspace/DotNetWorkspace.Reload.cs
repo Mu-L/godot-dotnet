@@ -198,4 +198,18 @@ partial class DotNetWorkspace
             }
         });
     }
+
+    private void WaitForReload()
+    {
+        // Wait until the initial load completes so that the workspace is ready to use when this method returns.
+        while (true)
+        {
+            if (IsAvailable)
+            {
+                break;
+            }
+
+            Thread.Sleep(100);
+        }
+    }
 }

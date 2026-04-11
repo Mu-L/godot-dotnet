@@ -71,6 +71,7 @@ internal sealed partial class DotNetWorkspace : IDisposable
     private DotNetWorkspace(string projectPath)
     {
         UpdateProjectPath(projectPath);
+        WaitForReload();
     }
 
     [MemberNotNull(nameof(_projectPath))]
