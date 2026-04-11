@@ -12,6 +12,8 @@ using Godot.Common.CodeAnalysis;
 using Godot.EditorIntegration.CodeEditors;
 using Godot.EditorIntegration.Internals;
 using Godot.EditorIntegration.Utils;
+using Godot.NativeInterop;
+using Godot.NativeInterop.Marshallers;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -72,6 +74,74 @@ internal sealed partial class DotNetEditorExtensionSourceCodePlugin : EditorExte
             }
 
             return classDeclarationSyntax.SyntaxTree.FilePath;
+        }
+    }
+
+    protected override unsafe bool _GetLocationInSource(StringName className, StringName methodName, void* rSourcePath, int* rLine, int* rColumn)
+    {
+        try
+        {
+            return GetLocationInSourceCore(className.ToString(), methodName.ToString(), (NativeGodotString*)rSourcePath, rLine, rColumn);
+        }
+        catch (Exception e)
+        {
+            GD.PrintErr($"Error getting source code location for {className}.{methodName}: {e}");
+            return false;
+        }
+
+        static bool GetLocationInSourceCore(string className, string methodName, NativeGodotString* rSourcePath, int* rLine, int* rColumn, CancellationToken cancellationToken = default)
+        {
+            using var workspace = DotNetWorkspace.OpenAsync(EditorPath.ProjectCSProjPath, cancellationToken).Result;
+
+            // There can't be multiple symbols with the same name registered in Godot,
+            // so if we found more than one symbol, we are in an invalid state and we
+            // can just return false.
+            var symbol = workspace.FindTypeSymbols(className).SingleOrDefault();
+            if (symbol is null)
+            {
+                return false;
+            }
+
+            var methodSymbols = symbol.GetMembers(methodName);
+            if (methodSymbols.Length == 0)
+            {
+                return false;
+            }
+
+            foreach (var methodSymbol in methodSymbols)
+            {
+                if (!methodSymbol.HasAttribute(KnownTypeNames.BindMethodAttribute))
+                {
+                    continue;
+                }
+
+                var syntaxReference = methodSymbol.DeclaringSyntaxReferences.FirstOrDefault();
+                if (syntaxReference is null)
+                {
+                    continue;
+                }
+
+                var methodDeclarationSyntax = syntaxReference.GetSyntax(cancellationToken) as MethodDeclarationSyntax;
+                if (methodDeclarationSyntax is null)
+                {
+                    continue;
+                }
+
+                var lineSpan = methodDeclarationSyntax.SyntaxTree.GetLineSpan(methodDeclarationSyntax.Identifier.Span, cancellationToken);
+
+                // Godot's line and column numbers are 0-based, which matches Roslyn's LinePosition.
+                string filePath = methodDeclarationSyntax.SyntaxTree.FilePath;
+                int line = lineSpan.StartLinePosition.Line;
+                int column = lineSpan.StartLinePosition.Character;
+
+                StringMarshaller.WriteUnmanaged(rSourcePath, filePath);
+                *rLine = line;
+                *rColumn = column;
+
+                return true;
+            }
+
+            return false;
         }
     }
 
