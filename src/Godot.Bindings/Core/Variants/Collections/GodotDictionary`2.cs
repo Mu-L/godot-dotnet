@@ -37,7 +37,7 @@ public sealed class GodotDictionary<[MustBeVariant] TKey, [MustBeVariant] TValue
     private static unsafe void WriteUnmanagedFunc(in GodotDictionary<TKey, TValue> value, void* destination)
     {
         *(NativeGodotDictionary*)destination = value is not null
-            ? value.NativeValue.DangerousSelfRef
+            ? NativeGodotDictionary.Create(value.NativeValue.DangerousSelfRef)
             : default;
     }
 
