@@ -9,7 +9,7 @@ namespace Godot.BindingsGeneration.ApiDump;
 /// Contains the Godot API information dumped from a Godot build.
 /// Usually deserialized from a 'extension_api.json' file.
 /// </summary>
-public class GodotApi
+public sealed class GodotApi
 {
     /// <summary>
     /// Godot version information.

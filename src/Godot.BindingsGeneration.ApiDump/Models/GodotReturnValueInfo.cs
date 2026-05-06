@@ -3,7 +3,7 @@ namespace Godot.BindingsGeneration.ApiDump;
 /// <summary>
 /// Defines the return of a Godot method.
 /// </summary>
-public class GodotReturnValueInfo
+public sealed class GodotReturnValueInfo
 {
     /// <summary>
     /// Name of the type of the argument.

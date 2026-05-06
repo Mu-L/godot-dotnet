@@ -5,7 +5,7 @@ namespace Godot.BindingsGeneration.ApiDump;
 /// <summary>
 /// Defines a Godot method for an engine class.
 /// </summary>
-public class GodotMethodInfo
+public sealed class GodotMethodInfo
 {
     /// <summary>
     /// Name of the method.

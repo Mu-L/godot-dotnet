@@ -3,7 +3,7 @@ namespace Godot.BindingsGeneration.ApiDump;
 /// <summary>
 /// Defines a Godot property for an engine class.
 /// </summary>
-public class GodotPropertyInfo
+public sealed class GodotPropertyInfo
 {
     /// <summary>
     /// Name of the property.

@@ -3,7 +3,7 @@ namespace Godot.BindingsGeneration.ApiDump;
 /// <summary>
 /// Defines the constructor of a Godot built-in class.
 /// </summary>
-public class GodotConstructorInfo
+public sealed class GodotConstructorInfo
 {
     /// <summary>
     /// Index of the constructor that must be used to invoke it.

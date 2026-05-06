@@ -3,7 +3,7 @@ namespace Godot.BindingsGeneration.ApiDump;
 /// <summary>
 /// Defines the value of a Godot enum's member.
 /// </summary>
-public class GodotEnumValueInfo
+public sealed class GodotEnumValueInfo
 {
     /// <summary>
     /// Name of the enum's member.

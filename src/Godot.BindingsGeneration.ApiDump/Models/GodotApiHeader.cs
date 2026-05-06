@@ -3,7 +3,7 @@ namespace Godot.BindingsGeneration.ApiDump;
 /// <summary>
 /// Contains the version of Godot that the GDExtension API information was dumped from.
 /// </summary>
-public class GodotApiHeader
+public sealed class GodotApiHeader
 {
     /// <summary>
     /// Major section of the version (e.g.: the '4' in '4.1.0').

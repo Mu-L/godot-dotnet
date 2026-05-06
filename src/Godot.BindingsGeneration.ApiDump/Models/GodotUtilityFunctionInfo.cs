@@ -3,7 +3,7 @@ namespace Godot.BindingsGeneration.ApiDump;
 /// <summary>
 /// Defines a Godot utility function.
 /// </summary>
-public class GodotUtilityFunctionInfo
+public sealed class GodotUtilityFunctionInfo
 {
     /// <summary>
     /// Name of the function.

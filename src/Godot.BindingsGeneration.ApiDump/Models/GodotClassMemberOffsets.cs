@@ -3,7 +3,7 @@ namespace Godot.BindingsGeneration.ApiDump;
 /// <summary>
 /// Defines the offsets for all the members of a specific Godot class.
 /// </summary>
-public class GodotClassMemberOffsets
+public sealed class GodotClassMemberOffsets
 {
     /// <summary>
     /// Name of the Godot class that contains the members.

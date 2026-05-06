@@ -4,7 +4,7 @@ namespace Godot.BindingsGeneration.ApiDump;
 /// Defines a Godot class. These are usually referred to as the engine classes and
 /// ultimately derive from the Godot's Object type.
 /// </summary>
-public class GodotClassInfo
+public sealed class GodotClassInfo
 {
     /// <summary>
     /// Name of the class.

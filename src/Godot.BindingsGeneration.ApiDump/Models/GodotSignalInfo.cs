@@ -3,7 +3,7 @@ namespace Godot.BindingsGeneration.ApiDump;
 /// <summary>
 /// Defines a Godot signal for an engine class.
 /// </summary>
-public class GodotSignalInfo
+public sealed class GodotSignalInfo
 {
     /// <summary>
     /// Name of the method.

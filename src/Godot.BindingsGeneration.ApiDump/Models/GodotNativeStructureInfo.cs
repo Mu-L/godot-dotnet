@@ -3,7 +3,7 @@ namespace Godot.BindingsGeneration.ApiDump;
 /// <summary>
 /// Defines a Godot native structure.
 /// </summary>
-public class GodotNativeStructureInfo
+public sealed class GodotNativeStructureInfo
 {
     /// <summary>
     /// Name of the native structure.

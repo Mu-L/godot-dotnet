@@ -3,7 +3,7 @@ namespace Godot.BindingsGeneration.ApiDump;
 /// <summary>
 /// Defines the argument of a Godot method.
 /// </summary>
-public class GodotArgumentInfo
+public sealed class GodotArgumentInfo
 {
     /// <summary>
     /// Name of the method's argument.

@@ -3,7 +3,7 @@ namespace Godot.BindingsGeneration.ApiDump;
 /// <summary>
 /// Defines a Godot method for a built-in class.
 /// </summary>
-public class GodotBuiltInMethodInfo
+public sealed class GodotBuiltInMethodInfo
 {
     /// <summary>
     /// Name of the method.

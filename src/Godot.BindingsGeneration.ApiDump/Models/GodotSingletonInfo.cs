@@ -5,7 +5,7 @@ namespace Godot.BindingsGeneration.ApiDump;
 /// Contains the name used to access the singleton and the type of the singleton.
 /// The type is defined in <see cref="GodotApi.Classes"/>.
 /// </summary>
-public class GodotSingletonInfo
+public sealed class GodotSingletonInfo
 {
     /// <summary>
     /// Name of the singleton.

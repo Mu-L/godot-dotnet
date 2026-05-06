@@ -4,7 +4,7 @@ namespace Godot.BindingsGeneration.ApiDump;
 /// Defines a collection of member offset information for Godot classes
 /// for a specific build configuration.
 /// </summary>
-public class GodotClassMemberOffsetsGroup
+public sealed class GodotClassMemberOffsetsGroup
 {
     /// <summary>
     /// The build configuration that this member offset information applies to.

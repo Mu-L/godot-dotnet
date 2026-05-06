@@ -3,7 +3,7 @@ namespace Godot.BindingsGeneration.ApiDump;
 /// <summary>
 /// Defines a Godot operator.
 /// </summary>
-public class GodotOperatorInfo
+public sealed class GodotOperatorInfo
 {
     /// <summary>
     /// Name of the operator.

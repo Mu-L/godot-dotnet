@@ -3,7 +3,7 @@ namespace Godot.BindingsGeneration.ApiDump;
 /// <summary>
 /// Defines a Godot built-in class. These classes are typically represented as structs in C#.
 /// </summary>
-public class GodotBuiltInClassInfo
+public sealed class GodotBuiltInClassInfo
 {
     /// <summary>
     /// Name of the class.

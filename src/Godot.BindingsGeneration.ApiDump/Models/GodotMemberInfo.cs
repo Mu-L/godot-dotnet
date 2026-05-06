@@ -3,7 +3,7 @@ namespace Godot.BindingsGeneration.ApiDump;
 /// <summary>
 /// Defines the member of a Godot built-in class.
 /// </summary>
-public class GodotMemberInfo
+public sealed class GodotMemberInfo
 {
     /// <summary>
     /// Name of the member.

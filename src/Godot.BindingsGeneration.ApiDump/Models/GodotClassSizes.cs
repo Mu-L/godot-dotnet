@@ -4,7 +4,7 @@ namespace Godot.BindingsGeneration.ApiDump;
 /// Defines a collection of size information for Godot classes
 /// for a specific build configuration.
 /// </summary>
-public class GodotClassSizes
+public sealed class GodotClassSizes
 {
     /// <summary>
     /// The build configuration that this size information applies to.

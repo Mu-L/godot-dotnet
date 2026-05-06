@@ -3,7 +3,7 @@ namespace Godot.BindingsGeneration.ApiDump;
 /// <summary>
 /// Defines a Godot constant.
 /// </summary>
-public class GodotConstantInfo
+public sealed class GodotConstantInfo
 {
     /// <summary>
     /// Name of the constant.
