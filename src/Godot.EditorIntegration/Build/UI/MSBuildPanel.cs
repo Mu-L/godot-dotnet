@@ -26,8 +26,8 @@ internal sealed partial class MSBuildPanel : EditorDock
 
     public MSBuildPanel()
     {
-        Name = "MSBuild";
-        IconName = "BuildDotNet";
+        Name = StringName.CreateStaticStringNameFromAsciiLiteral("MSBuild"u8);
+        IconName = StringName.CreateStaticStringNameFromAsciiLiteral("BuildDotNet"u8);
         DefaultSlot = DockSlot.Bottom;
         AvailableLayouts = DockLayout.Horizontal | DockLayout.Floating;
         Global = false;
