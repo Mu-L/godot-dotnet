@@ -40,21 +40,6 @@ public static partial class BindingsGenerator
         GenerateCore(data, writerFactory, logger);
     }
 
-    /// <summary>
-    /// Get a file-based writer factory for the given output directories.
-    /// </summary>
-    /// <param name="outputDirectoryPath">Output directory path for the generated bindings.</param>
-    /// <param name="testOutputDirectoryPath">Optional output directory path for the generated tests.</param>
-    /// <returns>A file-based writer factory.</returns>
-    public static IBindingsGeneratorWriterFactory CreateFileWriterFactory(string outputDirectoryPath, string? testOutputDirectoryPath = null)
-    {
-        return new FileBindingsGeneratorWriterFactory()
-        {
-            OutputDirectoryPath = outputDirectoryPath,
-            TestOutputDirectoryPath = testOutputDirectoryPath,
-        };
-    }
-
     private static bool ValidateOptionsForGeneration(GodotApi api, BindingsGeneratorOptions options, ILogger logger)
     {
         // Validate that the requested precision matches the API.
