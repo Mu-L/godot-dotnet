@@ -17,16 +17,7 @@ internal static partial class CSharpCodeFixVerifier<TCodeFix, TAnalyzer>
     {
         public Test(MetadataReference[] beforeReferences, MetadataReference[] afterReferences)
         {
-            ReferenceAssemblies = ReferenceAssemblies.Net.Net90;
-
-            SolutionTransforms.Add((solution, projectId) =>
-            {
-                var project = solution.GetProject(projectId);
-                project = project!
-                    .WithParseOptions(((Microsoft.CodeAnalysis.CSharp.CSharpParseOptions)project.ParseOptions!)
-                        .WithLanguageVersion((Microsoft.CodeAnalysis.CSharp.LanguageVersion)1300));
-                return project.Solution;
-            });
+            ReferenceAssemblies = ReferenceAssemblies.Net.Net100;
 
             TestState.AdditionalReferences.AddRange(beforeReferences);
             FixedState.AdditionalReferences.AddRange(afterReferences);

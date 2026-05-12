@@ -48,7 +48,7 @@ internal static class PropertyUsageFlagsExtensions
 {
     public static string FullNameWithGlobal(this PropertyUsageFlags propertyUsageFlags)
     {
-#if NET9_0_OR_GREATER
+#if NET
         PropertyUsageFlags[] values = Enum.GetValues<PropertyUsageFlags>();
 #else
         PropertyUsageFlags[] values = (PropertyUsageFlags[])Enum.GetValues(typeof(PropertyUsageFlags));
@@ -59,7 +59,7 @@ internal static class PropertyUsageFlagsExtensions
             return GetFlagFullNameWithGlobal(name);
         }
 
-#if NET9_0_OR_GREATER
+#if NET
         string[] names = Enum.GetNames<PropertyUsageFlags>();
 #else
         string[] names = Enum.GetNames(typeof(PropertyUsageFlags));
@@ -101,7 +101,7 @@ internal static class PropertyUsageFlagsExtensions
             // Shortcut for default value.
             if (value == PropertyUsageFlags.None)
             {
-#if NET9_0_OR_GREATER
+#if NET
                 name = Enum.GetName(PropertyUsageFlags.None)!;
 #else
                 name = Enum.GetName(typeof(PropertyUsageFlags), PropertyUsageFlags.None);
@@ -117,7 +117,7 @@ internal static class PropertyUsageFlagsExtensions
                     if (values[i] == value)
                     {
                         // The value matches exactly, so there is only one flag and we found it.
-#if NET9_0_OR_GREATER
+#if NET
                         name = Enum.GetName(value)!;
 #else
                         name = Enum.GetName(typeof(PropertyUsageFlags), value);

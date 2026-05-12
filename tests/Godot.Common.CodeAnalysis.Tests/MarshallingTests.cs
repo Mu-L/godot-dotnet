@@ -335,7 +335,7 @@ public class MarshallingTests
 
     private static async Task<CSharpCompilation> CreateCompilationAsync(CancellationToken cancellationToken = default)
     {
-        var referenceAssemblies = ReferenceAssemblies.Net.Net90;
+        var referenceAssemblies = ReferenceAssemblies.Net.Net100;
         var references = await referenceAssemblies.ResolveAsync(LanguageNames.CSharp, cancellationToken);
 
         references = references.Add(MetadataReference.CreateFromFile(typeof(GodotObject).Assembly.Location));

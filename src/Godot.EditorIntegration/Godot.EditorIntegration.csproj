@@ -40,7 +40,7 @@
     <PackageReference Include="System.CommandLine" Version="$(SystemCommandLineVersion)" />
     <PackageReference Include="JetBrains.Rider.PathLocator" Version="$(JetBrainsRiderPathLocatorVersion)" />
     <PackageReference Include="Microsoft.Build" Version="$(MicrosoftBuildVersion)" ExcludeAssets="runtime" />
-    <PackageReference Include="Microsoft.Build.Locator" Version="$(MicrosoftBuildLocatorVersion)" />
+    <PackageReference Include="Microsoft.Build.Locator" Version="$(MicrosoftBuildLocatorVersion)" ExcludeAssets="buildTransitive" />
     <PackageReference Include="Microsoft.VisualStudio.SolutionPersistence" Version="$(MicrosoftVisualStudioSolutionPersistenceVersion)" />
   </ItemGroup>
 
@@ -110,6 +110,41 @@
         TargetPath="$([System.IO.Path]::Combine('%(AdditionalAssets.ContentFolderName)', '%(AdditionalAssets.TargetPath)'))"
         PackagePath="$([System.IO.Path]::Combine('contentFiles', 'any', 'any', '%(AdditionalAssets.ContentFolderName)', '%(AdditionalAssets.TargetPath)'))"
         CopyToOutputDirectory="PreserveNewest"
+        PackageCopyToOutput="true" />
+    </ItemGroup>
+  </Target>
+
+  <!--
+    MSBuildWorkspace runs MSBuild evaluations out-of-process using a build host process.
+    Include the BuildHost directories in the package so that MSBuildWorkspace can find the necessary files.
+    See https://github.com/dotnet/roslyn/pull/70469.
+
+    The build host is deployed both at the top level and inside the packaged Godot.UpgradeAssistant.Cli
+    because 'GetNetCoreBuildHostPath()' resolves the path relative to the assembly that is currently loaded.
+  -->
+  <Target Name="PackageBuildHostDirectories" BeforeTargets="_GetPackageFiles;AssignTargetPaths" Condition="'$(DesignTimeBuild)' != 'true'">
+    <ItemGroup>
+      <_BuildHostNet472Files Include="$(OutputPath)BuildHost-net472/**/*">
+        <BuildHostFolderName>BuildHost-net472</BuildHostFolderName>
+      </_BuildHostNet472Files>
+      <_BuildHostNetcoreFiles Include="$(OutputPath)BuildHost-netcore/**/*">
+        <BuildHostFolderName>BuildHost-netcore</BuildHostFolderName>
+      </_BuildHostNetcoreFiles>
+    </ItemGroup>
+    <ItemGroup>
+      <!-- Godot.EditorIntegration -->
+      <Content Include="%(_BuildHostNet472Files.Identity)"
+        PackagePath="contentFiles/any/any/%(_BuildHostNet472Files.BuildHostFolderName)/%(_BuildHostNet472Files.RecursiveDir)%(_BuildHostNet472Files.Filename)%(_BuildHostNet472Files.Extension)"
+        PackageCopyToOutput="true" />
+      <Content Include="%(_BuildHostNetcoreFiles.Identity)"
+        PackagePath="contentFiles/any/any/%(_BuildHostNetcoreFiles.BuildHostFolderName)/%(_BuildHostNetcoreFiles.RecursiveDir)%(_BuildHostNetcoreFiles.Filename)%(_BuildHostNetcoreFiles.Extension)"
+        PackageCopyToOutput="true" />
+      <!-- Godot.UpgradeAssistant.Cli -->
+      <Content Include="%(_BuildHostNet472Files.Identity)"
+        PackagePath="contentFiles/any/any/Godot.UpgradeAssistant.Cli/%(_BuildHostNet472Files.BuildHostFolderName)/%(_BuildHostNet472Files.RecursiveDir)%(_BuildHostNet472Files.Filename)%(_BuildHostNet472Files.Extension)"
+        PackageCopyToOutput="true" />
+      <Content Include="%(_BuildHostNetcoreFiles.Identity)"
+        PackagePath="contentFiles/any/any/Godot.UpgradeAssistant.Cli/%(_BuildHostNetcoreFiles.BuildHostFolderName)/%(_BuildHostNetcoreFiles.RecursiveDir)%(_BuildHostNetcoreFiles.Filename)%(_BuildHostNetcoreFiles.Extension)"
         PackageCopyToOutput="true" />
     </ItemGroup>
   </Target>

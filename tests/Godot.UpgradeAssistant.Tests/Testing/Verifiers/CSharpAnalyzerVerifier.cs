@@ -16,7 +16,7 @@ internal static class CSharpAnalyzerVerifier<TAnalyzer> where TAnalyzer : Diagno
     {
         public Test(MetadataReference[] references)
         {
-            ReferenceAssemblies = ReferenceAssemblies.Net.Net90;
+            ReferenceAssemblies = ReferenceAssemblies.Net.Net100;
 
             SolutionTransforms.Add((Solution solution, ProjectId projectId) =>
             {

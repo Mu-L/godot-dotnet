@@ -165,7 +165,7 @@ internal static class SyntaxUtils
         return syntaxNode;
     }
 
-#if NET9_0_OR_GREATER
+#if NET
     /// <summary>
     /// Create a <see cref="QualifiedNameSyntax"/> to reference a type
     /// specified by the provided fully-qualified name.
@@ -325,7 +325,7 @@ internal static class SyntaxUtils
         return newSyntaxNode;
     }
 
-#if NET9_0_OR_GREATER
+#if NET
     /// <summary>
     /// Create an <see cref="AttributeSyntax"/> from the attribute type
     /// specified by the provided fully-qualified name.
@@ -410,7 +410,7 @@ internal static class SyntaxUtils
         return CreateAttributeArgument(argumentName, valueExpression);
     }
 
-#if NET9_0_OR_GREATER
+#if NET
     /// <summary>
     /// Create an <see cref="AttributeArgumentSyntax"/> from a member access expression.
     /// Optionally, it can be a named argument if <paramref name="argumentName"/> is not null.

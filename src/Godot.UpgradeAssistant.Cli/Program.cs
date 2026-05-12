@@ -6,4 +6,4 @@ using Microsoft.Build.Locator;
 MSBuildLocator.RegisterDefaults();
 
 var rootCommand = new CliRootCommand();
-return await new CommandLineConfiguration(rootCommand).InvokeAsync(args);
+return await rootCommand.Parse(args).InvokeAsync();

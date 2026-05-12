@@ -10,7 +10,7 @@
   <!-- The TFMs to build and test against. -->
   <PropertyGroup>
     <!-- The TFM of the major release of .NET that the Godot packages align with. -->
-    <NetCurrent>net9.0</NetCurrent>
+    <NetCurrent>net10.0</NetCurrent>
   </PropertyGroup>
 
   <!-- Language configuration. -->

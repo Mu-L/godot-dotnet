@@ -50,7 +50,7 @@ internal static class PropertyHintExtensions
 {
     public static string FullNameWithGlobal(this PropertyHint propertyHint)
     {
-#if NET9_0_OR_GREATER
+#if NET
         if (!Enum.IsDefined(propertyHint))
 #else
         if (!Enum.IsDefined(typeof(PropertyHint), propertyHint))
@@ -59,7 +59,7 @@ internal static class PropertyHintExtensions
             throw new ArgumentOutOfRangeException(nameof(propertyHint), $"Unrecognized PropertyHint value '{propertyHint}'.");
         }
 
-#if NET9_0_OR_GREATER
+#if NET
         return $"global::Godot.PropertyHint.{Enum.GetName(propertyHint)}";
 #else
         return $"global::Godot.PropertyHint.{Enum.GetName(typeof(PropertyHint), propertyHint)}";

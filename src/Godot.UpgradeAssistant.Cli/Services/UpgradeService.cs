@@ -197,7 +197,7 @@ internal sealed class UpgradeService
             WorkspaceInfo.DotNetWorkspaceDiagnostic -= LogWorkspaceDiagnostics;
         }
 
-        static void LogWorkspaceDiagnostics(object? _, WorkspaceDiagnosticEventArgs e)
+        static void LogWorkspaceDiagnostics(WorkspaceDiagnosticEventArgs e)
         {
             switch (e.Diagnostic.Kind)
             {

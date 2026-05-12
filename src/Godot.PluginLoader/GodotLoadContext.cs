@@ -1,4 +1,3 @@
-using System.IO;
 using System.Reflection;
 using System.Runtime.Loader;
 
@@ -22,18 +21,12 @@ internal sealed class GodotLoadContext : AssemblyLoadContext
         string? assemblyPath = _resolver.ResolveAssemblyToPath(assemblyName);
         if (!string.IsNullOrEmpty(assemblyPath))
         {
-            // Load in memory to prevent locking the file.
-
-            using var assemblyFile = File.Open(assemblyPath, FileMode.Open, FileAccess.Read, FileShare.Read);
-            string pdbPath = Path.ChangeExtension(assemblyPath, ".pdb");
-
-            if (File.Exists(pdbPath))
-            {
-                using var pdbFile = File.Open(pdbPath, FileMode.Open, FileAccess.Read, FileShare.Read);
-                return LoadFromStream(assemblyFile, pdbFile);
-            }
-
-            return LoadFromStream(assemblyFile);
+            // Load dependency assemblies from their file path so that Assembly.Location is
+            // set correctly. Some libraries (e.g. Microsoft.CodeAnalysis.Workspaces.MSBuild)
+            // rely on Assembly.Location to locate their own side-by-side resources at runtime.
+            // Unlike the main assembly (which is loaded from a stream in Main.cs to avoid
+            // file-locking on Windows), dependencies are probably fine to load from path.
+            return LoadFromAssemblyPath(assemblyPath);
         }
 
         return null;

@@ -51,7 +51,7 @@ internal static class VariantTypeExtensions
 {
     public static string FullNameWithGlobal(this VariantType variantType)
     {
-#if NET9_0_OR_GREATER
+#if NET
         if (!Enum.IsDefined(variantType))
 #else
         if (!Enum.IsDefined(typeof(VariantType), variantType))
@@ -60,7 +60,7 @@ internal static class VariantTypeExtensions
             throw new ArgumentOutOfRangeException(nameof(variantType), $"Unrecognized VariantType value '{variantType}'.");
         }
 
-#if NET9_0_OR_GREATER
+#if NET
         return $"global::Godot.VariantType.{Enum.GetName(variantType)}";
 #else
         return $"global::Godot.VariantType.{Enum.GetName(typeof(VariantType), variantType)}";

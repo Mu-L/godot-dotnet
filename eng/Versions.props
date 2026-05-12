@@ -8,58 +8,69 @@
   </PropertyGroup>
   <PropertyGroup>
     <!-- System -->
-    <SystemCommandLineVersion>2.0.0-beta5.25306.1</SystemCommandLineVersion>
+    <SystemCommandLineVersion>2.0.7</SystemCommandLineVersion>
     <!-- MSBuild -->
-    <MicrosoftBuildVersion>17.14.28</MicrosoftBuildVersion>
-    <MicrosoftBuildLocatorVersion>1.9.1</MicrosoftBuildLocatorVersion>
+    <MicrosoftBuildVersion>18.0.2</MicrosoftBuildVersion>
+    <MicrosoftBuildLocatorVersion>1.11.2</MicrosoftBuildLocatorVersion>
     <MicrosoftBuildUtilitiesCoreVersion>$(MicrosoftBuildVersion)</MicrosoftBuildUtilitiesCoreVersion>
+    <MicrosoftBuildFrameworkVersion>$(MicrosoftBuildVersion)</MicrosoftBuildFrameworkVersion>
     <!-- Roslyn -->
     <!--
       The exact version is always a moving target. This version should never go ahead the version of Roslyn that is
       included in the most recent Visual Studio version or the most recent .NET SDK version. If it were to go ahead,
       then any components (analyzers, source generators) depending on this version would not work in Visual Studio.
     -->
-    <MicrosoftCodeAnalysisVersion_LatestVS>4.13.0</MicrosoftCodeAnalysisVersion_LatestVS>
+    <MicrosoftCodeAnalysisVersion_LatestVS>5.0.0</MicrosoftCodeAnalysisVersion_LatestVS>
     <MicrosoftCodeAnalysisCSharpVersion>$(MicrosoftCodeAnalysisVersion_LatestVS)</MicrosoftCodeAnalysisCSharpVersion>
     <MicrosoftCodeAnalysisCSharpWorkspacesVersion>$(MicrosoftCodeAnalysisVersion_LatestVS)</MicrosoftCodeAnalysisCSharpWorkspacesVersion>
     <MicrosoftCodeAnalysisWorkspacesMSBuildVersion>$(MicrosoftCodeAnalysisVersion_LatestVS)</MicrosoftCodeAnalysisWorkspacesMSBuildVersion>
     <MicrosoftCodeAnalysisCommonVersion>$(MicrosoftCodeAnalysisVersion_LatestVS)</MicrosoftCodeAnalysisCommonVersion>
-    <MicrosoftCodeAnalysisTestingVersion>1.1.2</MicrosoftCodeAnalysisTestingVersion>
+    <MicrosoftCodeAnalysisTestingVersion>1.1.3</MicrosoftCodeAnalysisTestingVersion>
     <MicrosoftCodeAnalysisCSharpAnalyzerTestingVersion>$(MicrosoftCodeAnalysisTestingVersion)</MicrosoftCodeAnalysisCSharpAnalyzerTestingVersion>
     <MicrosoftCodeAnalysisCSharpCodeFixTestingVersion>$(MicrosoftCodeAnalysisTestingVersion)</MicrosoftCodeAnalysisCSharpCodeFixTestingVersion>
     <MicrosoftCodeAnalysisCSharpSourceGeneratorsTestingVersion>$(MicrosoftCodeAnalysisTestingVersion)</MicrosoftCodeAnalysisCSharpSourceGeneratorsTestingVersion>
     <MicrosoftCodeAnalysisResxSourceGeneratorVersion>5.0.0-1.25277.114</MicrosoftCodeAnalysisResxSourceGeneratorVersion>
     <!-- NuGet -->
-    <NuGetVersioningVersion>6.13.1</NuGetVersioningVersion>
-    <NuGetProjectModelVersion>6.13.1</NuGetProjectModelVersion>
-    <NuGetProtocolVersion>6.13.1</NuGetProtocolVersion>
+    <!--
+      We intentionally use NuGet 6.x instead of 7.x, despite the .NET 10.0.103 SDK shipping with NuGet 7.0.3.
+      The 'Microsoft.CodeAnalysis.Analyzer.Testing' package (1.1.3) was compiled against 'NuGet.Frameworks' 6.3.4,
+      and 'NuGet.Frameworks' 7.x changed NuGetFrameworkSorter's constructor causing a 'MethodAccessException'.
+      See: https://github.com/dotnet/roslyn-sdk/issues/1255
+      TODO: Update to NuGet 7.0.3 once a compatible version of 'Microsoft.CodeAnalysis.Analyzer.Testing' is released.
+    -->
+    <NuGetVersion>6.13.1</NuGetVersion>
+    <NuGetVersioningVersion>$(NuGetVersion)</NuGetVersioningVersion>
+    <NuGetProjectModelVersion>$(NuGetVersion)</NuGetProjectModelVersion>
+    <NuGetProtocolVersion>$(NuGetVersion)</NuGetProtocolVersion>
+    <NuGetConfigurationVersion>$(NuGetVersion)</NuGetConfigurationVersion>
+    <NuGetFrameworksVersion>$(NuGetVersion)</NuGetFrameworksVersion>
     <!-- Solution Persistence -->
     <MicrosoftVisualStudioSolutionPersistenceVersion>1.0.52</MicrosoftVisualStudioSolutionPersistenceVersion>
     <!-- Template Engine Authoring -->
-    <MicrosoftTemplateEngineAuthoringTemplateVerifierVersion>9.0.312</MicrosoftTemplateEngineAuthoringTemplateVerifierVersion>
+    <MicrosoftTemplateEngineAuthoringTemplateVerifierVersion>10.0.107</MicrosoftTemplateEngineAuthoringTemplateVerifierVersion>
     <!-- MSTest -->
-    <MicrosoftNETTestSdkVersion>17.10.0</MicrosoftNETTestSdkVersion>
+    <MicrosoftNETTestSdkVersion>18.0.0</MicrosoftNETTestSdkVersion>
     <!-- XUnit -->
-    <XUnitVersion>2.8.1</XUnitVersion>
-    <XUnitAnalyzersVersion>1.14.0</XUnitAnalyzersVersion>
+    <XUnitVersion>2.9.3</XUnitVersion>
     <XUnitAssertVersion>$(XUnitVersion)</XUnitAssertVersion>
     <XUnitRunnerConsoleVersion>$(XUnitVersion)</XUnitRunnerConsoleVersion>
-    <XUnitRunnerVisualStudioVersion>$(XUnitVersion)</XUnitRunnerVisualStudioVersion>
+    <XUnitAnalyzersVersion>1.27.0</XUnitAnalyzersVersion>
+    <XUnitRunnerVisualStudioVersion>2.8.2</XUnitRunnerVisualStudioVersion>
     <!-- Coverlet -->
-    <CoverletCollectorVersion>6.0.2</CoverletCollectorVersion>
+    <CoverletCollectorVersion>10.0.0</CoverletCollectorVersion>
     <!-- ClangSharp -->
-    <ClangSharpVersion>18.1.0</ClangSharpVersion>
+    <ClangSharpVersion>21.1.8.3</ClangSharpVersion>
     <!-- EnvDTE -->
-    <EnvDTEVersion>17.8.37221</EnvDTEVersion>
+    <EnvDTEVersion>17.14.40260</EnvDTEVersion>
     <!-- JetBrains -->
-    <JetBrainsRiderPathLocatorVersion>1.0.11</JetBrainsRiderPathLocatorVersion>
+    <JetBrainsRiderPathLocatorVersion>1.0.12</JetBrainsRiderPathLocatorVersion>
     <!-- Microsoft.Extensions -->
-    <MicrosoftExtensionsHostingVersion>9.0.0</MicrosoftExtensionsHostingVersion>
+    <MicrosoftExtensionsHostingVersion>10.0.0</MicrosoftExtensionsHostingVersion>
     <!-- Serilog -->
-    <SerilogVersion>4.2.0</SerilogVersion>
-    <SerilogExtensionsHostingVersion>9.0.0</SerilogExtensionsHostingVersion>
+    <SerilogVersion>4.3.1</SerilogVersion>
+    <SerilogExtensionsHostingVersion>10.0.0</SerilogExtensionsHostingVersion>
     <SerilogFormattingCompactVersion>3.0.0</SerilogFormattingCompactVersion>
-    <SerilogSinksConsoleVersion>6.0.0</SerilogSinksConsoleVersion>
-    <SerilogSinksFileVersion>6.0.0</SerilogSinksFileVersion>
+    <SerilogSinksConsoleVersion>6.1.1</SerilogSinksConsoleVersion>
+    <SerilogSinksFileVersion>7.0.0</SerilogSinksFileVersion>
   </PropertyGroup>
 </Project>

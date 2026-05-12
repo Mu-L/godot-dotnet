@@ -38,7 +38,7 @@ internal static class ProjectUtils
         root.Sdk = GodotSdkAttrValue;
 
         var mainGroup = root.AddPropertyGroup();
-        mainGroup.AddProperty("TargetFramework", "net9.0");
+        mainGroup.AddProperty("TargetFramework", "net10.0");
         mainGroup.AddProperty("EnableDynamicLoading", "true");
 
         string sanitizedName = IdentifierUtils.SanitizeName(projectName);

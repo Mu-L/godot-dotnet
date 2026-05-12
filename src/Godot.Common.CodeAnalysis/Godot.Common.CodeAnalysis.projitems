@@ -9,7 +9,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)**\*.cs" />
   </ItemGroup>
 
-  <ItemGroup Label="Exclude polyfills from modern .NET" Condition="'$(TargetFramework)' == 'net9.0'">
+  <ItemGroup Label="Exclude polyfills from modern .NET" Condition="'$(TargetFramework)' == 'net10.0'">
     <Compile Remove="$(MSBuildThisFileDirectory)Polyfills\**" />
   </ItemGroup>
 

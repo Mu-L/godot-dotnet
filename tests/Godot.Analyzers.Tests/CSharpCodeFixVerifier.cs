@@ -16,7 +16,7 @@ internal static class CSharpCodeFixVerifier<TCodeFix, TAnalyzer>
     {
         public Test()
         {
-            ReferenceAssemblies = ReferenceAssemblies.Net.Net90;
+            ReferenceAssemblies = ReferenceAssemblies.Net.Net100;
 
             SolutionTransforms.Add((Solution solution, ProjectId projectId) =>
             {

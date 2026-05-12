@@ -18,7 +18,7 @@ partial class WorkspaceInfo
     /// An event raised whenever a .NET workspace logs errors or other diagnostics,
     /// like an error when trying to open a workspace.
     /// </summary>
-    public static event EventHandler<WorkspaceDiagnosticEventArgs>? DotNetWorkspaceDiagnostic;
+    public static event Action<WorkspaceDiagnosticEventArgs>? DotNetWorkspaceDiagnostic;
 
     /// <summary>
     /// Create a <see cref="WorkspaceInfo"/> from the given path to the
@@ -93,7 +93,7 @@ partial class WorkspaceInfo
         }
 
         var workspace = MSBuildWorkspace.Create();
-        workspace.WorkspaceFailed += LogWorkspaceDiagnostics;
+        workspace.RegisterWorkspaceFailedHandler(LogWorkspaceDiagnostics);
 
         var solution = await workspace.OpenSolutionAsync(dotnetSolutionFilePath, cancellationToken: cancellationToken).ConfigureAwait(false);
 
@@ -110,9 +110,9 @@ partial class WorkspaceInfo
 
         return new MSBuildDotNetWorkspaceInfo(workspace, project, projectRoot, globalJsonPath);
 
-        static void LogWorkspaceDiagnostics(object? sender, WorkspaceDiagnosticEventArgs e)
+        static void LogWorkspaceDiagnostics(WorkspaceDiagnosticEventArgs e)
         {
-            DotNetWorkspaceDiagnostic?.Invoke(sender, e);
+            DotNetWorkspaceDiagnostic?.Invoke(e);
         }
     }
 
