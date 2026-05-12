@@ -124,6 +124,9 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
+  <data name="GDSP0001_EventHandlerSuffix_Justification" xml:space="preserve">
+    <value>Signal delegates are used in events so the naming follows the guidelines.</value>
+  </data>
   <data name="GODOT0001_GodotAttributeHasNoEffectOutsideGodotClass_Description" xml:space="preserve">
     <value>The attribute has no effect outside of classes with the '[GodotClass]' attribute. Remove the attribute or add the '[GodotClass]' to the containing class.</value>
   </data>

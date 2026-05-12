@@ -1,12 +1,8 @@
-using System.Diagnostics.CodeAnalysis;
-
 namespace Godot.Bindings.IntegrationTests.TestGame;
 
 [GodotClass]
 public partial class TestSignals : Control
 {
-    // TODO: Add suppressor to Godot.Analyzers
-    [SuppressMessage("Naming", "CA1711:Identifiers should not have incorrect suffix", Justification = "Godot signals must end with 'EventHandler' to follow the convention.")]
     [Signal(Name = "custom_signal")]
     public delegate void CustomSignalEventHandler(string name, int value);
 

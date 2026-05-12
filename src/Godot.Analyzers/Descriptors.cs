@@ -363,4 +363,13 @@ internal static class Descriptors
         helpLinkUri: FormatHelpLink("GODOT0901"));
 
     #endregion
+
+    #region Suppression descriptors.
+
+    public static readonly SuppressionDescriptor GDSP0001_EventHandlerSuffix = new(
+        id: "GDSP0001",
+        suppressedDiagnosticId: "CA1711",
+        justification: SR.GDSP0001_EventHandlerSuffix_Justification);
+
+    #endregion
 }
