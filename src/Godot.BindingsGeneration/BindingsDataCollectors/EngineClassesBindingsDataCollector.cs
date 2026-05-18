@@ -188,6 +188,9 @@ internal sealed class EngineClassesBindingsDataCollector : BindingsDataCollector
                 ReturnParameter = ReturnInfo.FromType(KnownTypes.SystemVoidPtr),
                 Body = MethodBody.CreateUnsafe(writer =>
                 {
+                    writer.WriteLine("try");
+                    writer.OpenBlock();
+
                     writer.WriteLine($"var instance = global::Godot.GodotObject.Create(() => new {type.FullNameWithGlobal}(), new()");
                     writer.WriteLine('{');
                     writer.Indent++;
@@ -196,7 +199,14 @@ internal sealed class EngineClassesBindingsDataCollector : BindingsDataCollector
                     writer.WriteLine("NativeClassName = NativeName,");
                     writer.Indent--;
                     writer.WriteLine("});");
-                    writer.WriteLine($"return (void*)global::System.Runtime.InteropServices.GCHandle.ToIntPtr(instance.GCHandle);");
+                    writer.WriteLine("return (void*)global::System.Runtime.InteropServices.GCHandle.ToIntPtr(instance.GCHandle);");
+
+                    writer.CloseBlock();
+
+                    writer.WriteLine("catch (global::System.Exception exception) when (global::Godot.NativeInterop.ExceptionHandling.IsHandled(exception))");
+                    writer.OpenBlock();
+                    writer.WriteLine("return null;");
+                    writer.CloseBlock();
                 }),
             };
             type.DeclaredMethods.Add(createBindingCallbackMethod);

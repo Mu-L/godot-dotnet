@@ -150,115 +150,170 @@ public abstract class CustomCallable : IDisposable
     [UnmanagedCallersOnly(CallConvs = [typeof(CallConvCdecl)])]
     private static unsafe void Call_Native(void* userData, NativeGodotVariant** args, long argsCount, NativeGodotVariant* outRet, GDExtensionCallError* outError)
     {
-        var gcHandle = GCHandle.FromIntPtr((nint)userData);
-        var callable = (CustomCallable?)gcHandle.Target;
-
-        Debug.Assert(callable is not null);
-
-        if (callable is null)
+        try
         {
-            outError->error = GDExtensionCallErrorType.GDEXTENSION_CALL_ERROR_INSTANCE_IS_NULL;
-            return;
-        }
+            var gcHandle = GCHandle.FromIntPtr((nint)userData);
+            var callable = (CustomCallable?)gcHandle.Target;
 
-        callable.Call(new NativeGodotVariantPtrSpan(args, (int)argsCount), outRet, outError);
+            Debug.Assert(callable is not null);
+
+            if (callable is null)
+            {
+                outError->error = GDExtensionCallErrorType.GDEXTENSION_CALL_ERROR_INSTANCE_IS_NULL;
+                return;
+            }
+
+            callable.Call(new NativeGodotVariantPtrSpan(args, (int)argsCount), outRet, outError);
+        }
+        catch (Exception exception) when (ExceptionHandling.IsHandled(exception))
+        {
+            outError->error = GDExtensionCallErrorType.GDEXTENSION_CALL_ERROR_INVALID_METHOD;
+        }
     }
 
     [UnmanagedCallersOnly(CallConvs = [typeof(CallConvCdecl)])]
     private static unsafe bool IsValid_Native(void* userData)
     {
-        var gcHandle = GCHandle.FromIntPtr((nint)userData);
-        var callable = (CustomCallable?)gcHandle.Target;
+        try
+        {
+            var gcHandle = GCHandle.FromIntPtr((nint)userData);
+            var callable = (CustomCallable?)gcHandle.Target;
 
-        if (callable is null)
+            if (callable is null)
+            {
+                return false;
+            }
+
+            return callable.IsValid();
+        }
+        catch (Exception exception) when (ExceptionHandling.IsHandled(exception))
         {
             return false;
         }
-
-        return callable.IsValid();
     }
 
     [UnmanagedCallersOnly(CallConvs = [typeof(CallConvCdecl)])]
     private static unsafe void Free_Native(void* userData)
     {
-        var gcHandle = GCHandle.FromIntPtr((nint)userData);
-        if (gcHandle.Target is IDisposable disposable)
+        try
         {
-            disposable.Dispose();
+            var gcHandle = GCHandle.FromIntPtr((nint)userData);
+            if (gcHandle.Target is IDisposable disposable)
+            {
+                disposable.Dispose();
+            }
+            gcHandle.Free();
         }
-        gcHandle.Free();
+        catch (Exception exception) when (ExceptionHandling.IsHandled(exception)) { }
     }
 
     [UnmanagedCallersOnly(CallConvs = [typeof(CallConvCdecl)])]
     private static unsafe uint Hash_Native(void* userData)
     {
-        var gcHandle = GCHandle.FromIntPtr((nint)userData);
-        var callable = (CustomCallable?)gcHandle.Target;
+        try
+        {
+            var gcHandle = GCHandle.FromIntPtr((nint)userData);
+            var callable = (CustomCallable?)gcHandle.Target;
 
-        Debug.Assert(callable is not null);
+            Debug.Assert(callable is not null);
 
-        return (uint)callable.GetHashCode();
+            return (uint)callable.GetHashCode();
+        }
+        catch (Exception exception) when (ExceptionHandling.IsHandled(exception))
+        {
+            return 0;
+        }
     }
 
     [UnmanagedCallersOnly(CallConvs = [typeof(CallConvCdecl)])]
     private static unsafe bool Equals_Native(void* userDataLeft, void* userDataRight)
     {
-        var gcHandleLeft = GCHandle.FromIntPtr((nint)userDataLeft);
-        var callableLeft = (CustomCallable?)gcHandleLeft.Target;
+        try
+        {
+            var gcHandleLeft = GCHandle.FromIntPtr((nint)userDataLeft);
+            var callableLeft = (CustomCallable?)gcHandleLeft.Target;
 
-        var gcHandleRight = GCHandle.FromIntPtr((nint)userDataRight);
-        var callableRight = (CustomCallable?)gcHandleRight.Target;
+            var gcHandleRight = GCHandle.FromIntPtr((nint)userDataRight);
+            var callableRight = (CustomCallable?)gcHandleRight.Target;
 
-        return EqualityComparer<CustomCallable>.Default.Equals(callableLeft, callableRight);
+            return EqualityComparer<CustomCallable>.Default.Equals(callableLeft, callableRight);
+        }
+        catch (Exception exception) when (ExceptionHandling.IsHandled(exception))
+        {
+            return false;
+        }
     }
 
     [UnmanagedCallersOnly(CallConvs = [typeof(CallConvCdecl)])]
     private static unsafe bool LessThan_Native(void* userDataLeft, void* userDataRight)
     {
-        var gcHandleLeft = GCHandle.FromIntPtr((nint)userDataLeft);
-        var callableLeft = (CustomCallable?)gcHandleLeft.Target;
-
-        var gcHandleRight = GCHandle.FromIntPtr((nint)userDataRight);
-        var callableRight = (CustomCallable?)gcHandleRight.Target;
-
-        return Comparer<CustomCallable>.Default.Compare(callableLeft, callableRight) switch
+        try
         {
-            // callableLeft is less than callableRight.
-            < 0 => true,
-            // callableLeft equals callableRight.
-            0 => false,
-            // callableLeft is greater than callableRight.
-            > 0 => false,
-        };
+            var gcHandleLeft = GCHandle.FromIntPtr((nint)userDataLeft);
+            var callableLeft = (CustomCallable?)gcHandleLeft.Target;
+
+            var gcHandleRight = GCHandle.FromIntPtr((nint)userDataRight);
+            var callableRight = (CustomCallable?)gcHandleRight.Target;
+
+            return Comparer<CustomCallable>.Default.Compare(callableLeft, callableRight) switch
+            {
+                // callableLeft is less than callableRight.
+                < 0 => true,
+                // callableLeft equals callableRight.
+                0 => false,
+                // callableLeft is greater than callableRight.
+                > 0 => false,
+            };
+        }
+        catch (Exception exception) when (ExceptionHandling.IsHandled(exception))
+        {
+            return false;
+        }
     }
 
     [UnmanagedCallersOnly(CallConvs = [typeof(CallConvCdecl)])]
     private static unsafe void ToString_Native(void* userData, bool* outIsValid, NativeGodotString* outStr)
     {
-        var gcHandle = GCHandle.FromIntPtr((nint)userData);
-        var callable = (CustomCallable?)gcHandle.Target;
+        try
+        {
+            var gcHandle = GCHandle.FromIntPtr((nint)userData);
+            var callable = (CustomCallable?)gcHandle.Target;
 
-        if (callable is null)
+            if (callable is null)
+            {
+                *outIsValid = false;
+                *outStr = default;
+            }
+            else
+            {
+                *outIsValid = true;
+                *outStr = NativeGodotString.Create(callable.ToString());
+            }
+        }
+        catch (Exception exception) when (ExceptionHandling.IsHandled(exception))
         {
             *outIsValid = false;
             *outStr = default;
-        }
-        else
-        {
-            *outIsValid = true;
-            *outStr = NativeGodotString.Create(callable.ToString());
         }
     }
 
     [UnmanagedCallersOnly(CallConvs = [typeof(CallConvCdecl)])]
     private static unsafe long GetArgumentCount_Native(void* userData, bool* outIsValid)
     {
-        var gcHandle = GCHandle.FromIntPtr((nint)userData);
-        var callable = (CustomCallable?)gcHandle.Target;
+        try
+        {
+            var gcHandle = GCHandle.FromIntPtr((nint)userData);
+            var callable = (CustomCallable?)gcHandle.Target;
 
-        Debug.Assert(callable is not null);
+            Debug.Assert(callable is not null);
 
-        *outIsValid = callable.TryGetArgumentCount(out long argCount);
-        return argCount;
+            *outIsValid = callable.TryGetArgumentCount(out long argCount);
+            return argCount;
+        }
+        catch (Exception exception) when (ExceptionHandling.IsHandled(exception))
+        {
+            *outIsValid = false;
+            return 0;
+        }
     }
 }

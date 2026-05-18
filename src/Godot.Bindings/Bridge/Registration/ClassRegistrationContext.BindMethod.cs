@@ -144,22 +144,33 @@ partial class ClassRegistrationContext
     [UnmanagedCallersOnly(CallConvs = [typeof(CallConvCdecl)])]
     private static unsafe void CallWithPtrArgs_Native(void* methodUserData, void* instance, void** args, void* outRet)
     {
-        var gcHandle = GCHandle.FromIntPtr((nint)methodUserData);
-        var method = (MethodDefinition?)gcHandle.Target;
+        try
+        {
+            var gcHandle = GCHandle.FromIntPtr((nint)methodUserData);
+            var method = (MethodDefinition?)gcHandle.Target;
 
-        Debug.Assert(method is not null);
+            Debug.Assert(method is not null);
 
-        method.Invoker.CallWithPtrArgs(method, instance, args, outRet);
+            method.Invoker.CallWithPtrArgs(method, instance, args, outRet);
+        }
+        catch (Exception exception) when (ExceptionHandling.IsHandled(exception)) { }
     }
 
     [UnmanagedCallersOnly(CallConvs = [typeof(CallConvCdecl)])]
     private static unsafe void CallWithVariantArgs_Native(void* methodUserData, void* instance, NativeGodotVariant** args, long argCount, NativeGodotVariant* outRet, GDExtensionCallError* outError)
     {
-        var gcHandle = GCHandle.FromIntPtr((nint)methodUserData);
-        var method = (MethodDefinition?)gcHandle.Target;
+        try
+        {
+            var gcHandle = GCHandle.FromIntPtr((nint)methodUserData);
+            var method = (MethodDefinition?)gcHandle.Target;
 
-        Debug.Assert(method is not null);
+            Debug.Assert(method is not null);
 
-        method.Invoker.CallWithVariantArgs(method, instance, new NativeGodotVariantPtrSpan(args, (int)argCount), outRet, outError);
+            method.Invoker.CallWithVariantArgs(method, instance, new NativeGodotVariantPtrSpan(args, (int)argCount), outRet, outError);
+        }
+        catch (Exception exception) when (ExceptionHandling.IsHandled(exception))
+        {
+            outError->error = GDExtensionCallErrorType.GDEXTENSION_CALL_ERROR_INVALID_METHOD;
+        }
     }
 }

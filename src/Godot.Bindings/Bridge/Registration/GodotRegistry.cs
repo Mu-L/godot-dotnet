@@ -218,181 +218,236 @@ public static partial class GodotRegistry
     [UnmanagedCallersOnly(CallConvs = [typeof(CallConvCdecl)])]
     private static unsafe bool Set_Native(void* instance, NativeGodotStringName* name, NativeGodotVariant* value)
     {
-        if (instance is not null)
+        try
         {
-            var gcHandle = GCHandle.FromIntPtr((nint)instance);
-            var instanceObj = (GodotObject?)gcHandle.Target;
+            if (instance is not null)
+            {
+                var gcHandle = GCHandle.FromIntPtr((nint)instance);
+                var instanceObj = (GodotObject?)gcHandle.Target;
 
-            Debug.Assert(instanceObj is not null);
+                Debug.Assert(instanceObj is not null);
 
-            StringName nameManaged = StringName.CreateCopying(*name);
-            Variant valueManaged = Variant.CreateCopying(*value);
+                StringName nameManaged = StringName.CreateCopying(*name);
+                Variant valueManaged = Variant.CreateCopying(*value);
 
-            return instanceObj._Set(nameManaged, valueManaged);
+                return instanceObj._Set(nameManaged, valueManaged);
+            }
+
+            return false;
         }
-
-        return false;
+        catch (Exception exception) when (ExceptionHandling.IsHandled(exception))
+        {
+            return false;
+        }
     }
 
     [UnmanagedCallersOnly(CallConvs = [typeof(CallConvCdecl)])]
     private static unsafe bool Get_Native(void* instance, NativeGodotStringName* name, NativeGodotVariant* outRet)
     {
-        if (instance is not null)
+        try
         {
-            var gcHandle = GCHandle.FromIntPtr((nint)instance);
-            var instanceObj = (GodotObject?)gcHandle.Target;
+            if (instance is not null)
+            {
+                var gcHandle = GCHandle.FromIntPtr((nint)instance);
+                var instanceObj = (GodotObject?)gcHandle.Target;
 
-            Debug.Assert(instanceObj is not null);
+                Debug.Assert(instanceObj is not null);
 
-            StringName nameManaged = StringName.CreateCopying(*name);
+                StringName nameManaged = StringName.CreateCopying(*name);
 
-            bool ok = instanceObj._Get(nameManaged, out Variant valueManaged);
+                bool ok = instanceObj._Get(nameManaged, out Variant valueManaged);
 
-            *outRet = NativeGodotVariant.Create(valueManaged.NativeValue.DangerousSelfRef);
-            return ok;
+                *outRet = NativeGodotVariant.Create(valueManaged.NativeValue.DangerousSelfRef);
+                return ok;
+            }
+
+            return false;
         }
-
-        return false;
+        catch (Exception exception) when (ExceptionHandling.IsHandled(exception))
+        {
+            return false;
+        }
     }
 
     [UnmanagedCallersOnly(CallConvs = [typeof(CallConvCdecl)])]
     private static unsafe GDExtensionPropertyInfo* GetPropertyList_Native(void* instance, uint* outCount)
     {
-        if (instance is null)
+        try
         {
-            if (outCount is not null)
+            if (instance is null)
             {
-                *outCount = 0;
+                if (outCount is not null)
+                {
+                    *outCount = 0;
+                }
+                return null;
             }
-            return null;
-        }
 
-        var gcHandle = GCHandle.FromIntPtr((nint)instance);
-        var instanceObj = (GodotObject?)gcHandle.Target;
-
-        Debug.Assert(instanceObj is not null);
-
-        var propertyList = instanceObj.GetPropertyListStorage();
-        Debug.Assert(propertyList.Count == 0, "Internal error, property list was not freed by engine!");
-
-        instanceObj._GetPropertyList(propertyList);
-
-        GDExtensionPropertyInfo* propertyListPtr = PropertyInfoList.ConvertToNative(propertyList);
-
-        if (outCount is not null)
-        {
-            *outCount = (uint)propertyList.Count;
-        }
-        return propertyListPtr;
-    }
-
-    [UnmanagedCallersOnly(CallConvs = [typeof(CallConvCdecl)])]
-    private static unsafe void FreePropertyList_Native(void* instance, GDExtensionPropertyInfo* propertyListPtr, uint count)
-    {
-        if (instance is not null)
-        {
             var gcHandle = GCHandle.FromIntPtr((nint)instance);
             var instanceObj = (GodotObject?)gcHandle.Target;
 
             Debug.Assert(instanceObj is not null);
 
             var propertyList = instanceObj.GetPropertyListStorage();
-            Debug.Assert(propertyList.Count == count);
-            propertyList.Clear();
+            Debug.Assert(propertyList.Count == 0, "Internal error, property list was not freed by engine!");
 
-            PropertyInfoList.FreeNative(propertyListPtr, (int)count);
+            instanceObj._GetPropertyList(propertyList);
+
+            GDExtensionPropertyInfo* propertyListPtr = PropertyInfoList.ConvertToNative(propertyList);
+
+            if (outCount is not null)
+            {
+                *outCount = (uint)propertyList.Count;
+            }
+            return propertyListPtr;
         }
+        catch (Exception exception) when (ExceptionHandling.IsHandled(exception))
+        {
+            if (outCount is not null)
+            {
+                *outCount = 0;
+            }
+
+            return null;
+        }
+    }
+
+    [UnmanagedCallersOnly(CallConvs = [typeof(CallConvCdecl)])]
+    private static unsafe void FreePropertyList_Native(void* instance, GDExtensionPropertyInfo* propertyListPtr, uint count)
+    {
+        try
+        {
+            if (instance is not null)
+            {
+                var gcHandle = GCHandle.FromIntPtr((nint)instance);
+                var instanceObj = (GodotObject?)gcHandle.Target;
+
+                Debug.Assert(instanceObj is not null);
+
+                var propertyList = instanceObj.GetPropertyListStorage();
+                Debug.Assert(propertyList.Count == count);
+                propertyList.Clear();
+
+                PropertyInfoList.FreeNative(propertyListPtr, (int)count);
+            }
+        }
+        catch (Exception exception) when (ExceptionHandling.IsHandled(exception)) { }
     }
 
     [UnmanagedCallersOnly(CallConvs = [typeof(CallConvCdecl)])]
     private static unsafe bool PropertyCanRevert_Native(void* instance, NativeGodotStringName* name)
     {
-        if (instance is not null)
+        try
         {
-            var gcHandle = GCHandle.FromIntPtr((nint)instance);
-            var instanceObj = (GodotObject?)gcHandle.Target;
+            if (instance is not null)
+            {
+                var gcHandle = GCHandle.FromIntPtr((nint)instance);
+                var instanceObj = (GodotObject?)gcHandle.Target;
 
-            Debug.Assert(instanceObj is not null);
+                Debug.Assert(instanceObj is not null);
 
-            StringName nameManaged = StringName.CreateCopying(*name);
+                StringName nameManaged = StringName.CreateCopying(*name);
 
-            return instanceObj._PropertyCanRevert(nameManaged);
+                return instanceObj._PropertyCanRevert(nameManaged);
+            }
+
+            return false;
         }
-
-        return false;
+        catch (Exception exception) when (ExceptionHandling.IsHandled(exception))
+        {
+            return false;
+        }
     }
 
     [UnmanagedCallersOnly(CallConvs = [typeof(CallConvCdecl)])]
     private static unsafe bool PropertyGetRevert_Native(void* instance, NativeGodotStringName* name, NativeGodotVariant* outRet)
     {
-        if (instance is not null)
+        try
         {
-            var gcHandle = GCHandle.FromIntPtr((nint)instance);
-            var instanceObj = (GodotObject?)gcHandle.Target;
+            if (instance is not null)
+            {
+                var gcHandle = GCHandle.FromIntPtr((nint)instance);
+                var instanceObj = (GodotObject?)gcHandle.Target;
 
-            Debug.Assert(instanceObj is not null);
+                Debug.Assert(instanceObj is not null);
 
-            StringName nameManaged = StringName.CreateCopying(*name);
+                StringName nameManaged = StringName.CreateCopying(*name);
 
-            bool ok = instanceObj._PropertyGetRevert(nameManaged, out Variant valueManaged);
+                bool ok = instanceObj._PropertyGetRevert(nameManaged, out Variant valueManaged);
 
-            *outRet = NativeGodotVariant.Create(valueManaged.NativeValue.DangerousSelfRef);
-            return ok;
+                *outRet = NativeGodotVariant.Create(valueManaged.NativeValue.DangerousSelfRef);
+                return ok;
+            }
+
+            return false;
         }
-
-        return false;
+        catch (Exception exception) when (ExceptionHandling.IsHandled(exception))
+        {
+            return false;
+        }
     }
 
     [UnmanagedCallersOnly(CallConvs = [typeof(CallConvCdecl)])]
     private static unsafe bool ValidateProperty_Native(void* instance, GDExtensionPropertyInfo* refProperty)
     {
-        if (instance is not null)
+        try
         {
-            var gcHandle = GCHandle.FromIntPtr((nint)instance);
-            var instanceObj = (GodotObject?)gcHandle.Target;
-
-            Debug.Assert(instanceObj is not null);
-
-            // Convert internal property info to the public managed type.
-            VariantType type = (VariantType)refProperty->type;
-            using StringName? name = StringNameMarshaller.ConvertFromUnmanaged(refProperty->name);
-            using StringName? className = StringNameMarshaller.ConvertFromUnmanaged(refProperty->class_name);
-            var propertyInfo = new PropertyInfo(name ?? StringName.Empty, type)
+            if (instance is not null)
             {
-                Hint = (PropertyHint)refProperty->hint,
-                HintString = StringMarshaller.ConvertFromUnmanaged(refProperty->hint_string),
-                ClassName = className,
-                Usage = (PropertyUsageFlags)refProperty->usage,
-            };
+                var gcHandle = GCHandle.FromIntPtr((nint)instance);
+                var instanceObj = (GodotObject?)gcHandle.Target;
 
-            instanceObj._ValidateProperty(propertyInfo);
+                Debug.Assert(instanceObj is not null);
 
-            // Update the property info with the data from the managed type.
-            refProperty->type = (GDExtensionVariantType)propertyInfo.Type;
-            StringNameMarshaller.WriteUnmanaged(refProperty->name, propertyInfo.Name);
-            refProperty->hint = (uint)propertyInfo.Hint;
-            StringMarshaller.WriteUnmanaged(refProperty->hint_string, propertyInfo.HintString);
-            StringNameMarshaller.WriteUnmanaged(refProperty->class_name, propertyInfo.ClassName);
-            refProperty->usage = (uint)propertyInfo.Usage;
+                // Convert internal property info to the public managed type.
+                VariantType type = (VariantType)refProperty->type;
+                using StringName? name = StringNameMarshaller.ConvertFromUnmanaged(refProperty->name);
+                using StringName? className = StringNameMarshaller.ConvertFromUnmanaged(refProperty->class_name);
+                var propertyInfo = new PropertyInfo(name ?? StringName.Empty, type)
+                {
+                    Hint = (PropertyHint)refProperty->hint,
+                    HintString = StringMarshaller.ConvertFromUnmanaged(refProperty->hint_string),
+                    ClassName = className,
+                    Usage = (PropertyUsageFlags)refProperty->usage,
+                };
 
-            return true;
+                instanceObj._ValidateProperty(propertyInfo);
+
+                // Update the property info with the data from the managed type.
+                refProperty->type = (GDExtensionVariantType)propertyInfo.Type;
+                StringNameMarshaller.WriteUnmanaged(refProperty->name, propertyInfo.Name);
+                refProperty->hint = (uint)propertyInfo.Hint;
+                StringMarshaller.WriteUnmanaged(refProperty->hint_string, propertyInfo.HintString);
+                StringNameMarshaller.WriteUnmanaged(refProperty->class_name, propertyInfo.ClassName);
+                refProperty->usage = (uint)propertyInfo.Usage;
+
+                return true;
+            }
+
+            return false;
         }
-
-        return false;
+        catch (Exception exception) when (ExceptionHandling.IsHandled(exception))
+        {
+            return false;
+        }
     }
 
     [UnmanagedCallersOnly(CallConvs = [typeof(CallConvCdecl)])]
     private static unsafe void Notification_Native(void* instance, int what, bool reversed)
     {
-        if (instance is not null)
+        try
         {
-            var gcHandle = GCHandle.FromIntPtr((nint)instance);
-            var instanceObj = (GodotObject?)gcHandle.Target;
+            if (instance is not null)
+            {
+                var gcHandle = GCHandle.FromIntPtr((nint)instance);
+                var instanceObj = (GodotObject?)gcHandle.Target;
 
-            Debug.Assert(instanceObj is not null);
+                Debug.Assert(instanceObj is not null);
 
-            DispatchNotification(instanceObj, what, reversed);
+                DispatchNotification(instanceObj, what, reversed);
+            }
         }
+        catch (Exception exception) when (ExceptionHandling.IsHandled(exception)) { }
     }
 
     private static void DispatchNotification(GodotObject instanceObj, int what, bool reversed)
@@ -453,110 +508,139 @@ public static partial class GodotRegistry
     [UnmanagedCallersOnly(CallConvs = [typeof(CallConvCdecl)])]
     private static unsafe void ToString_Native(void* instance, bool* outIsValid, NativeGodotString* outStr)
     {
-        var gcHandle = GCHandle.FromIntPtr((nint)instance);
+        try
+        {
+            var gcHandle = GCHandle.FromIntPtr((nint)instance);
 
-        var instanceObj = gcHandle.Target;
-        if (instanceObj is null)
+            var instanceObj = gcHandle.Target;
+            if (instanceObj is null)
+            {
+                *outIsValid = false;
+                return;
+            }
+
+            *outStr = NativeGodotString.Create(instanceObj.ToString());
+            *outIsValid = true;
+        }
+        catch (Exception exception) when (ExceptionHandling.IsHandled(exception))
         {
             *outIsValid = false;
-            return;
         }
-
-        *outStr = NativeGodotString.Create(instanceObj.ToString());
-        *outIsValid = true;
     }
 
     [UnmanagedCallersOnly(CallConvs = [typeof(CallConvCdecl)])]
     private static unsafe void* Create_Native(void* userData, bool notifyPostInitialize)
     {
-        var gcHandle = GCHandle.FromIntPtr((nint)userData);
-        var context = (ClassRegistrationContext?)gcHandle.Target;
-
-        Debug.Assert(context is not null);
-
-        if (context.RegisteredConstructor is null)
+        try
         {
-            throw new InvalidOperationException(SR.FormatInvalidOperation_CantInstantiateTypeConstructorNotRegistered(context.ClassName));
+            var gcHandle = GCHandle.FromIntPtr((nint)userData);
+            var context = (ClassRegistrationContext?)gcHandle.Target;
+
+            Debug.Assert(context is not null);
+
+            if (context.RegisteredConstructor is null)
+            {
+                throw new InvalidOperationException(SR.FormatInvalidOperation_CantInstantiateTypeConstructorNotRegistered(context.ClassName));
+            }
+
+            Debug.Assert(context.NativeClassName is not null);
+
+            var instance = GodotObject.Create(context.RegisteredConstructor, new()
+            {
+                NativeClassName = context.NativeClassName,
+                SkipPostInitializeNotification = true,
+            });
+
+            if (notifyPostInitialize)
+            {
+                instance.Notification((int)GodotObject.NotificationPostinitialize);
+            }
+
+            return (void*)instance.NativePtr;
         }
-
-        Debug.Assert(context.NativeClassName is not null);
-
-        var instance = GodotObject.Create(context.RegisteredConstructor, new()
+        catch (Exception exception) when (ExceptionHandling.IsHandled(exception))
         {
-            NativeClassName = context.NativeClassName,
-            SkipPostInitializeNotification = true,
-        });
-
-        if (notifyPostInitialize)
-        {
-            instance.Notification((int)GodotObject.NotificationPostinitialize);
+            return null;
         }
-
-        return (void*)instance.NativePtr;
     }
 
     [UnmanagedCallersOnly(CallConvs = [typeof(CallConvCdecl)])]
     private static unsafe void* Recreate_Native(void* userData, void* instanceNativePtr)
     {
-        var gcHandleContext = GCHandle.FromIntPtr((nint)userData);
-        var context = (ClassRegistrationContext?)gcHandleContext.Target;
-
-        Debug.Assert(context is not null);
-
-        if (context.RegisteredConstructor is null)
+        try
         {
-            throw new InvalidOperationException(SR.FormatInvalidOperation_CantInstantiateTypeConstructorNotRegistered(context.ClassName));
+            var gcHandleContext = GCHandle.FromIntPtr((nint)userData);
+            var context = (ClassRegistrationContext?)gcHandleContext.Target;
+
+            Debug.Assert(context is not null);
+
+            if (context.RegisteredConstructor is null)
+            {
+                throw new InvalidOperationException(SR.FormatInvalidOperation_CantInstantiateTypeConstructorNotRegistered(context.ClassName));
+            }
+
+            Debug.Assert(context.NativeClassName is not null);
+
+            var instance = GodotObject.Create(context.RegisteredConstructor, new()
+            {
+                NativePtr = (nint)instanceNativePtr,
+                NativeClassName = context.NativeClassName,
+            });
+
+            return (void*)GCHandle.ToIntPtr(instance.GCHandle);
         }
-
-        Debug.Assert(context.NativeClassName is not null);
-
-        var instance = GodotObject.Create(context.RegisteredConstructor, new()
+        catch (Exception exception) when (ExceptionHandling.IsHandled(exception))
         {
-            NativePtr = (nint)instanceNativePtr,
-            NativeClassName = context.NativeClassName,
-        });
-
-        return (void*)GCHandle.ToIntPtr(instance.GCHandle);
+            return null;
+        }
     }
 
     [UnmanagedCallersOnly(CallConvs = [typeof(CallConvCdecl)])]
     private static unsafe void Free_Native(void* userData, void* instance)
     {
-        if (instance is not null)
+        try
         {
-            var gcHandle = GCHandle.FromIntPtr((nint)instance);
-            var instanceObj = (GodotObject?)gcHandle.Target;
+            if (instance is not null)
+            {
+                var gcHandle = GCHandle.FromIntPtr((nint)instance);
+                var instanceObj = (GodotObject?)gcHandle.Target;
 
-            Debug.Assert(instanceObj is not null);
+                Debug.Assert(instanceObj is not null);
 
-            // The 'free' callback is called when the unmanaged object is released,
-            // clear the native pointer so the Dispose doesn't try to release it again.
-            // Also free the GCHandle so it can be released on the managed side.
-            instanceObj.NativePtr = 0;
-            gcHandle.Free();
+                // The 'free' callback is called when the unmanaged object is released,
+                // clear the native pointer so the Dispose doesn't try to release it again.
+                // Also free the GCHandle so it can be released on the managed side.
+                instanceObj.NativePtr = 0;
+                gcHandle.Free();
 
-            instanceObj.Dispose();
+                instanceObj.Dispose();
+            }
         }
+        catch (Exception exception) when (ExceptionHandling.IsHandled(exception)) { }
     }
 
     [UnmanagedCallersOnly(CallConvs = [typeof(CallConvCdecl)])]
     internal static unsafe void FreeBindingCallback_Native(void* token, void* nativePtr, void* instance)
     {
-        if (instance is not null)
+        try
         {
-            var gcHandle = GCHandle.FromIntPtr((nint)instance);
-            var instanceObj = (GodotObject?)gcHandle.Target;
+            if (instance is not null)
+            {
+                var gcHandle = GCHandle.FromIntPtr((nint)instance);
+                var instanceObj = (GodotObject?)gcHandle.Target;
 
-            Debug.Assert(instanceObj is not null);
+                Debug.Assert(instanceObj is not null);
 
-            // The 'free' callback is called when the unmanaged object is released,
-            // clear the native pointer so the Dispose doesn't try to release it again.
-            // Also free the GCHandle so it can be released on the managed side.
-            instanceObj.NativePtr = 0;
-            gcHandle.Free();
+                // The 'free' callback is called when the unmanaged object is released,
+                // clear the native pointer so the Dispose doesn't try to release it again.
+                // Also free the GCHandle so it can be released on the managed side.
+                instanceObj.NativePtr = 0;
+                gcHandle.Free();
 
-            instanceObj.Dispose();
+                instanceObj.Dispose();
+            }
         }
+        catch (Exception exception) when (ExceptionHandling.IsHandled(exception)) { }
     }
 
     [UnmanagedCallersOnly(CallConvs = [typeof(CallConvCdecl)])]
@@ -568,39 +652,50 @@ public static partial class GodotRegistry
     [UnmanagedCallersOnly(CallConvs = [typeof(CallConvCdecl)])]
     private static unsafe void* GetVirtualMethodUserData_Native(void* userData, NativeGodotStringName* name, uint hash)
     {
-        var gcHandle = GCHandle.FromIntPtr((nint)userData);
-        var context = (ClassRegistrationContext?)gcHandle.Target;
-
-        Debug.Assert(context is not null);
-        Debug.Assert(name is not null);
-
-        var lookup = context.RegisteredVirtualMethodOverrides.GetAlternateLookup<NativeGodotStringName>();
-        if (!lookup.TryGetValue(*name, out var virtualMethodInfo))
+        try
         {
-            // Virtual method not registered, it likely means it wasn't overridden.
-            // Returning null so it falls back to the default implementation.
+            var gcHandle = GCHandle.FromIntPtr((nint)userData);
+            var context = (ClassRegistrationContext?)gcHandle.Target;
+
+            Debug.Assert(context is not null);
+            Debug.Assert(name is not null);
+
+            var lookup = context.RegisteredVirtualMethodOverrides.GetAlternateLookup<NativeGodotStringName>();
+            if (!lookup.TryGetValue(*name, out var virtualMethodInfo))
+            {
+                // Virtual method not registered, it likely means it wasn't overridden.
+                // Returning null so it falls back to the default implementation.
+                return null;
+            }
+
+            return userData;
+        }
+        catch (Exception exception) when (ExceptionHandling.IsHandled(exception))
+        {
             return null;
         }
-
-        return userData;
     }
 
     [UnmanagedCallersOnly(CallConvs = [typeof(CallConvCdecl)])]
     private static unsafe void CallVirtualMethod_Native(void* instance, NativeGodotStringName* name, void* userData, void** args, void* outRet)
     {
-        var gcHandle = GCHandle.FromIntPtr((nint)userData);
-        var context = (ClassRegistrationContext?)gcHandle.Target;
+        try
+        {
+            var gcHandle = GCHandle.FromIntPtr((nint)userData);
+            var context = (ClassRegistrationContext?)gcHandle.Target;
 
-        Debug.Assert(context is not null);
-        Debug.Assert(name is not null);
+            Debug.Assert(context is not null);
+            Debug.Assert(name is not null);
 
-        var lookup = context.RegisteredVirtualMethodOverrides.GetAlternateLookup<NativeGodotStringName>();
+            var lookup = context.RegisteredVirtualMethodOverrides.GetAlternateLookup<NativeGodotStringName>();
 
-        // We already checked that the method is registered in 'GetVirtualMethodUserData_Native',
-        // this method would not have been called otherwise.
-        Debug.Assert(lookup.ContainsKey(*name), $"Virtual method '{name->ToString()}' has not been registered in class '{context.ClassName}'.");
+            // We already checked that the method is registered in 'GetVirtualMethodUserData_Native',
+            // this method would not have been called otherwise.
+            Debug.Assert(lookup.ContainsKey(*name), $"Virtual method '{name->ToString()}' has not been registered in class '{context.ClassName}'.");
 
-        var virtualMethodInfo = lookup[*name];
-        virtualMethodInfo.Invoker.CallVirtualWithPtrArgs(instance, args, outRet);
+            var virtualMethodInfo = lookup[*name];
+            virtualMethodInfo.Invoker.CallVirtualWithPtrArgs(instance, args, outRet);
+        }
+        catch (Exception exception) when (ExceptionHandling.IsHandled(exception)) { }
     }
 }

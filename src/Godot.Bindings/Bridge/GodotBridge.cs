@@ -121,43 +121,55 @@ public static partial class GodotBridge
     [UnmanagedCallersOnly(CallConvs = [typeof(CallConvCdecl)])]
     private static unsafe void InitializeLevel_Native(void* userData, GDExtensionInitializationLevel level)
     {
-        // Only initialize everything once at the first level.
-        if (level == 0)
+        try
         {
-            _syncContext = GodotSynchronizationContext.InitializeSynchronizationContext();
-
-            var mainLoopCallbacks = new GDExtensionMainLoopCallbacks()
+            // Only initialize everything once at the first level.
+            if (level == 0)
             {
-                frame_func = (nint)(delegate* unmanaged[Cdecl]<void>)(&Frame_Native)
-            };
+                _syncContext = GodotSynchronizationContext.InitializeSynchronizationContext();
 
-            _gdextensionInterface.register_main_loop_callbacks(_libraryPtr, &mainLoopCallbacks);
+                var mainLoopCallbacks = new GDExtensionMainLoopCallbacks()
+                {
+                    frame_func = (nint)(delegate* unmanaged[Cdecl]<void>)(&Frame_Native)
+                };
+
+                _gdextensionInterface.register_main_loop_callbacks(_libraryPtr, &mainLoopCallbacks);
+            }
+
+            _initCallback?.Invoke((InitializationLevel)level);
         }
-
-        _initCallback?.Invoke((InitializationLevel)level);
+        catch (Exception exception) when (ExceptionHandling.IsHandled(exception)) { }
     }
 
     [UnmanagedCallersOnly(CallConvs = [typeof(CallConvCdecl)])]
     private static unsafe void DeinitializeLevel_Native(void* userData, GDExtensionInitializationLevel level)
     {
-        _terminateCallback?.Invoke((InitializationLevel)level);
-
-        // Only free everything once at the last level.
-        if (level == 0)
+        try
         {
-            _syncContext?.Dispose();
-            _syncContext = null;
+            _terminateCallback?.Invoke((InitializationLevel)level);
 
-            GodotRegistry.RemoveAllEditorPlugins();
-            GodotRegistry.UnregisterAllClasses();
+            // Only free everything once at the last level.
+            if (level == 0)
+            {
+                _syncContext?.Dispose();
+                _syncContext = null;
 
-            DisposablesTracker.DisposeAll();
+                GodotRegistry.RemoveAllEditorPlugins();
+                GodotRegistry.UnregisterAllClasses();
+
+                DisposablesTracker.DisposeAll();
+            }
         }
+        catch (Exception exception) when (ExceptionHandling.IsHandled(exception)) { }
     }
 
     [UnmanagedCallersOnly(CallConvs = [typeof(CallConvCdecl)])]
     private static void Frame_Native()
     {
-        GodotSynchronizationContext.ExecutePendingContinuations();
+        try
+        {
+            GodotSynchronizationContext.ExecutePendingContinuations();
+        }
+        catch (Exception exception) when (ExceptionHandling.IsHandled(exception)) { }
     }
 }
