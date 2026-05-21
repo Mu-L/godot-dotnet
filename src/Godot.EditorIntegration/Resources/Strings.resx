@@ -385,6 +385,12 @@
   <data name="StatusIndicatorPanel_AssemblyLoadState_Failed" xml:space="preserve">
     <value>Failed to load C# assembly.</value>
   </data>
+  <data name="StatusIndicatorPanel_AssemblyLoadState_FailedToResolveGDExtensionEntryPoint" xml:space="preserve">
+    <value>Failed to resolve C# entry point. Make sure to rebuild the project after the upgrade and if you have disabled the entry point generator, define the entry point function with the right shape.</value>
+  </data>
+  <data name="StatusIndicatorPanel_AssemblyLoadState_FailedToInitializeGDExtension" xml:space="preserve">
+    <value>Failed to initialize C# assembly. The entry point function failed to initialize the C# assembly and returned false.</value>
+  </data>
   <data name="StatusIndicatorPanel_AssemblyLoadState_None" xml:space="preserve">
     <value>No C# assembly loaded.</value>
   </data>

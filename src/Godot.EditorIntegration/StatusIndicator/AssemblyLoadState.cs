@@ -16,10 +16,16 @@ internal enum AssemblyLoadFailedState
     ProjectNotFound,
     DllNotFound,
     FailedToLoad,
+    FailedToLoad_HostFxr,
+    FailedToLoad_PluginLoader,
+    FailedToLoad_GDExtensionEntryPoint,
+    FailedToLoad_GDExtensionInit,
 }
 
 // This enum merges the 'InitState' and 'AssemblyLoadFailState' enums from the C++ side,
 // to represent all possible states in a single value.
+// Note that errors related to hostfxr or the plugin loader are not represented here,
+// because those would prevent loading this assembly as well.
 internal enum AssemblyLoadState
 {
     NotLoaded,
@@ -28,4 +34,6 @@ internal enum AssemblyLoadState
     ProjectNotFound,
     DllNotFound,
     FailedToLoad,
+    FailedToResolveGDExtensionEntryPoint,
+    FailedToInitializeGDExtension,
 }

@@ -42,9 +42,20 @@ unsafe partial class EditorInternal
             InitState.Initialized => AssemblyLoadState.Loaded,
             InitState.Failed => (AssemblyLoadFailedState)failedState switch
             {
-                AssemblyLoadFailedState.ProjectNotFound => AssemblyLoadState.ProjectNotFound,
-                AssemblyLoadFailedState.DllNotFound => AssemblyLoadState.DllNotFound,
-                AssemblyLoadFailedState.FailedToLoad => AssemblyLoadState.FailedToLoad,
+                AssemblyLoadFailedState.ProjectNotFound =>
+                    AssemblyLoadState.ProjectNotFound,
+                AssemblyLoadFailedState.DllNotFound =>
+                    AssemblyLoadState.DllNotFound,
+                AssemblyLoadFailedState.FailedToLoad =>
+                    AssemblyLoadState.FailedToLoad,
+                AssemblyLoadFailedState.FailedToLoad_GDExtensionEntryPoint =>
+                    AssemblyLoadState.FailedToResolveGDExtensionEntryPoint,
+                AssemblyLoadFailedState.FailedToLoad_GDExtensionInit =>
+                    AssemblyLoadState.FailedToInitializeGDExtension,
+
+                // Fallback to the generic failure state.
+                // Note that errors related to hostfxr or the plugin loader will never reach here
+                // because those would prevent loading this assembly as well.
                 _ => AssemblyLoadState.FailedToLoad,
             },
             _ => AssemblyLoadState.NotLoaded,

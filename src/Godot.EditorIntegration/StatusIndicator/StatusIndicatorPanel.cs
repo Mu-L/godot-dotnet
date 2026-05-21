@@ -62,11 +62,13 @@ internal sealed partial class StatusIndicatorPanel : VBoxContainer
                 version = version.Substring(0, version.IndexOf('+'));
             }
 
-            var versionInfoButton = new LinkButton();
-            versionInfoButton.SetVSizeFlags(SizeFlags.ShrinkCenter);
-            versionInfoButton.TooltipText = SR.StatusIndicatorPanel_ClickToCopyVersion;
-            versionInfoButton.Text = version;
+            var versionInfoButton = new LinkButton()
+            {
+                Text = version,
+                TooltipText = SR.StatusIndicatorPanel_ClickToCopyVersion,
+            };
             versionInfoButton.Pressed += CopyEditorIntegrationVersionToClipboard;
+            versionInfoButton.SetVSizeFlags(SizeFlags.ShrinkCenter);
             hbox.AddChild(versionInfoButton);
         }
 
@@ -119,6 +121,8 @@ internal sealed partial class StatusIndicatorPanel : VBoxContainer
             _assemblyInfoLabel = new Label()
             {
                 Text = SR.StatusIndicatorPanel_AssemblyLoadState_None,
+                AutowrapMode = TextServer.AutowrapMode.WordSmart,
+                CustomMinimumSize = new Vector2(512, 1),
             };
             _assemblyInfoLabel.SetVSizeFlags(SizeFlags.ShrinkCenter);
             hbox.AddChild(_assemblyInfoLabel);
@@ -210,7 +214,7 @@ internal sealed partial class StatusIndicatorPanel : VBoxContainer
                     // don't show up in the editor, and show a build button to fix it.
                     severity.Update(StatusIndicatorSeverity.Warning);
                     _assemblyInfoIcon.Show();
-                    _assemblyInfoIcon.Texture = GetThemeIcon(EditorThemeNames.NodeWarning, EditorThemeNames.EditorIcons);
+                    _assemblyInfoIcon.Texture = GetThemeIcon(EditorThemeNames.StatusWarning, EditorThemeNames.EditorIcons);
                     _assemblyInfoLabel.Text = SR.StatusIndicatorPanel_AssemblyLoadState_DllNotFound;
                     _buildButton.Show();
                     break;
@@ -222,6 +226,28 @@ internal sealed partial class StatusIndicatorPanel : VBoxContainer
                     _assemblyInfoIcon.Show();
                     _assemblyInfoIcon.Texture = GetThemeIcon(EditorThemeNames.StatusError, EditorThemeNames.EditorIcons);
                     _assemblyInfoLabel.Text = SR.StatusIndicatorPanel_AssemblyLoadState_Failed;
+                    _buildButton.Show();
+                    break;
+                }
+
+                case AssemblyLoadState.FailedToResolveGDExtensionEntryPoint:
+                {
+                    severity.Update(StatusIndicatorSeverity.Error);
+                    _assemblyInfoIcon.Show();
+                    _assemblyInfoIcon.Texture = GetThemeIcon(EditorThemeNames.StatusError, EditorThemeNames.EditorIcons);
+                    _assemblyInfoLabel.Text = SR.StatusIndicatorPanel_AssemblyLoadState_FailedToResolveGDExtensionEntryPoint;
+                    _buildButton.Show();
+                    break;
+                }
+
+
+                case AssemblyLoadState.FailedToInitializeGDExtension:
+                {
+                    severity.Update(StatusIndicatorSeverity.Error);
+                    _assemblyInfoIcon.Show();
+                    _assemblyInfoIcon.Texture = GetThemeIcon(EditorThemeNames.StatusError, EditorThemeNames.EditorIcons);
+                    _assemblyInfoLabel.Text = SR.StatusIndicatorPanel_AssemblyLoadState_FailedToInitializeGDExtension;
+                    _buildButton.Show();
                     break;
                 }
             }
