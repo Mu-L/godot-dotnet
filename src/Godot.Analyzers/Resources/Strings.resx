@@ -199,6 +199,15 @@
   <data name="GODOT0102_GodotClassMustNotBeGeneric_Title" xml:space="preserve">
     <value>Class must not be generic</value>
   </data>
+  <data name="GODOT0103_GodotClassMustHaveParameterlessConstructor_Description" xml:space="preserve">
+    <value>Registered classes that are instantiable must have a parameterless constructor. Add a parameterless constructor, register a custom create method with the '[BindConstructor]' attribute, or remove the '[GodotClass]' attribute.</value>
+  </data>
+  <data name="GODOT0103_GodotClassMustHaveParameterlessConstructor_MessageFormat" xml:space="preserve">
+    <value>Type '{0}' is marked with '[GodotClass]' and it's instantiable but does not have a parameterless constructor</value>
+  </data>
+  <data name="GODOT0103_GodotClassMustHaveParameterlessConstructor_Title" xml:space="preserve">
+    <value>Class must have a parameterless constructor because it's instantiable</value>
+  </data>
   <data name="GODOT0201_BuilderMethodInaccessible_MessageFormat" xml:space="preserve">
     <value>Method '{0}' is inaccessible. The method must be accessible from the target type '{1}'. Consider making the method 'public' or 'internal'</value>
   </data>

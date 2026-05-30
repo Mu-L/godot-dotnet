@@ -39,10 +39,18 @@ internal static class ClassSpecCollector
         List<GodotRpcMethodSpec> rpcMethods = [];
         string? icon = null;
 
-        // Initialize constructor spec if the class is instantiable.
+        // Initialize constructor spec if the class is instantiable
+        // and has a suitable parameterless constructor.
         if (!typeSymbol.IsAbstract)
         {
-            constructor = GodotConstructorSpec.CreateForConstructor(typeSymbol);
+            foreach (var ctor in typeSymbol.Constructors)
+            {
+                if (ctor.Parameters.Length == 0)
+                {
+                    constructor = GodotConstructorSpec.CreateForConstructor(typeSymbol);
+                    break;
+                }
+            }
         }
 
         // Collect custom constructor spec and override the default one if found.

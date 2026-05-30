@@ -101,6 +101,16 @@ internal static class Descriptors
         isEnabledByDefault: true,
         helpLinkUri: FormatHelpLink("GODOT0102"));
 
+    public static readonly DiagnosticDescriptor GODOT0103_GodotClassMustHaveParameterlessConstructor = new(
+        id: "GODOT0103",
+        title: SR.GODOT0103_GodotClassMustHaveParameterlessConstructor_Title,
+        messageFormat: SR.GODOT0103_GodotClassMustHaveParameterlessConstructor_MessageFormat,
+        description: SR.GODOT0103_GodotClassMustHaveParameterlessConstructor_Description,
+        category: Category.Usage,
+        defaultSeverity: DiagnosticSeverity.Error,
+        isEnabledByDefault: true,
+        helpLinkUri: FormatHelpLink("GODOT0103"));
+
     #endregion
 
     #region 02XX: Rules about the [BindConstructor] attribute.

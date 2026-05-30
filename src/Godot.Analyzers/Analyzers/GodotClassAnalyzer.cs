@@ -11,6 +11,7 @@ internal sealed class GodotClassAnalyzer : DiagnosticAnalyzer
     public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics => ImmutableArray.Create([
         Descriptors.GODOT0101_GodotClassMustDeriveFromGodotObject,
         Descriptors.GODOT0102_GodotClassMustNotBeGeneric,
+        Descriptors.GODOT0103_GodotClassMustHaveParameterlessConstructor,
     ]);
 
     public override void Initialize(AnalysisContext context)
@@ -48,6 +49,32 @@ internal sealed class GodotClassAnalyzer : DiagnosticAnalyzer
                 // Message Format parameters.
                 symbol.ToDisplayString()
             ));
+        }
+
+        // If the type is instantiable and doesn't specify a custom constructor,
+        // it must have a parameterless constructor to be instantiated by the engine.
+        if (!symbol.IsAbstract
+         && !symbol.HasAttribute(KnownTypeNames.BindConstructorAttribute))
+        {
+            bool hasParameterlessConstructor = false;
+            foreach (var constructor in symbol.Constructors)
+            {
+                if (constructor.Parameters.Length == 0)
+                {
+                    hasParameterlessConstructor = true;
+                    break;
+                }
+            }
+
+            if (!hasParameterlessConstructor)
+            {
+                context.ReportDiagnostic(Diagnostic.Create(
+                    Descriptors.GODOT0103_GodotClassMustHaveParameterlessConstructor,
+                    symbol.Locations[0],
+                    // Message Format parameters.
+                    symbol.ToDisplayString()
+                ));
+            }
         }
     }
 }

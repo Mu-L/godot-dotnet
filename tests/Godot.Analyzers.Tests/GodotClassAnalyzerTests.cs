@@ -17,4 +17,10 @@ public class GodotClassAnalyzerTests
     {
         await Verifier.Verify("GODOT0102_GodotClassMustNotBeGeneric.cs");
     }
+
+    [Fact]
+    public async Task GodotClassMustHaveParameterlessConstructor()
+    {
+        await Verifier.Verify("GODOT0103_GodotClassMustHaveParameterlessConstructor.cs");
+    }
 }
