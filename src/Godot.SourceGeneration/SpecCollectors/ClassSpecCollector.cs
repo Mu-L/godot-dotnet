@@ -43,7 +43,7 @@ internal static class ClassSpecCollector
         // and has a suitable parameterless constructor.
         if (!typeSymbol.IsAbstract)
         {
-            foreach (var ctor in typeSymbol.Constructors)
+            foreach (var ctor in typeSymbol.InstanceConstructors)
             {
                 if (ctor.Parameters.Length == 0)
                 {

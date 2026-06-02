@@ -57,7 +57,7 @@ internal sealed class GodotClassAnalyzer : DiagnosticAnalyzer
          && !symbol.HasAttribute(KnownTypeNames.BindConstructorAttribute))
         {
             bool hasParameterlessConstructor = false;
-            foreach (var constructor in symbol.Constructors)
+            foreach (var constructor in symbol.InstanceConstructors)
             {
                 if (constructor.Parameters.Length == 0)
                 {
