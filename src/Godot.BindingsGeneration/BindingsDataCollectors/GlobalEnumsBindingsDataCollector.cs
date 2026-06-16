@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using Godot.BindingsGeneration.Reflection;
 using Godot.Common;
 
@@ -19,6 +20,11 @@ internal sealed class GlobalEnumsBindingsDataCollector : BindingsDataCollector
 
             context.AddGeneratedType($"GlobalEnums/{@enum.Name}.cs", @enum);
             context.TypeDB.RegisterTypeName(globalEnum.Name, @enum);
+
+            // IMPORTANT: In the engine, all global enums are declared in the '@GlobalScope' type,
+            // so we need to register the enum type as a global member so it can be resolved from
+            // the documentation.
+            context.TypeDB.RegisterGlobalMemberMapping($"@GlobalScope.{globalEnum.Name}", @enum.FullNameWithGlobal);
         }
     }
 
@@ -33,9 +39,21 @@ internal sealed class GlobalEnumsBindingsDataCollector : BindingsDataCollector
                 throw new InvalidOperationException($"Type found for '{globalEnum.Name}' is not an enum.");
             }
 
-            foreach (var (name, value) in globalEnum.Values)
+            Dictionary<FieldInfo, string> enumMemberMappings = [];
+            List<FieldInfo> enumConstantsByIndex = [];
+            foreach (var engineConstant in globalEnum.Values)
             {
-                enumType.Values.Add((NamingUtils.SnakeToPascalCase(name), value));
+                var constant = new FieldInfo(NamingUtils.SnakeToPascalCase(engineConstant.Name), enumType.UnderlyingType ?? KnownTypes.SystemInt32)
+                {
+                    VisibilityAttributes = VisibilityAttributes.Public,
+                    IsLiteral = true,
+                    DefaultValue = $"{engineConstant.Value}",
+                    Documentation = context.Options.IncludeDocumentation ? engineConstant.Description : null,
+                };
+
+                type.DeclaredFields.Add(constant);
+                enumMemberMappings[constant] = engineConstant.Name;
+                enumConstantsByIndex.Add(constant);
             }
 
             int enumPrefix = NamingUtils.DetermineEnumPrefix(globalEnum);
@@ -53,18 +71,25 @@ internal sealed class GlobalEnumsBindingsDataCollector : BindingsDataCollector
             }
 
             NamingUtils.ApplyPrefixToEnumConstants(globalEnum, enumType, enumPrefix);
-            NamingUtils.RemoveMaxConstant(globalEnum, enumType);
+            NamingUtils.RemoveMaxConstant(globalEnum, enumType, enumConstantsByIndex);
 
             // HARDCODED: Some enums have more constants that should be removed.
             if (globalEnum.Name is "JoyButton" or "JoyAxis")
             {
-                for (int i = 0; i < globalEnum.Values.Length; i++)
+                NamingUtils.RemoveConstant(globalEnum, enumType, enumConstantsByIndex,
+                    engineConstant => engineConstant.Name.EndsWith("_SDL_MAX", StringComparison.Ordinal));
+            }
+
+            // IMPORTANT: We only register the enum member mappings after we have processed the enum constants.
+            foreach (var constant in enumType.DeclaredFields)
+            {
+                if (enumMemberMappings.TryGetValue(constant, out string? engineMemberName))
                 {
-                    if (globalEnum.Values[i].Name.EndsWith("_SDL_MAX", StringComparison.Ordinal))
-                    {
-                        enumType.Values.RemoveAt(i);
-                        break;
-                    }
+                    context.TypeDB.RegisterMemberMapping(enumType, engineMemberName, constant);
+
+                    // Also register it as a global member so it can resolved from the documentation
+                    // when the enum name is omitted.
+                    context.TypeDB.RegisterGlobalMemberMapping($"@GlobalScope.{engineMemberName}", $"{enumType.FullNameWithGlobal}.{constant.Name}");
                 }
             }
         }

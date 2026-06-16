@@ -23,6 +23,11 @@ public class MemberInfo
     public List<string> Attributes { get; set; } = [];
 
     /// <summary>
+    /// XML documentation for this member.
+    /// </summary>
+    public string? Documentation { get; set; }
+
+    /// <summary>
     /// Constructs a new <see cref="MemberInfo"/>.
     /// </summary>
     /// <param name="name">Name of the member.</param>

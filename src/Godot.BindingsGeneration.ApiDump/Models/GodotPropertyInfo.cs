@@ -61,6 +61,15 @@ public sealed class GodotPropertyInfo
     [JsonPropertyName("index")]
     public int? Index { get; set; }
 
+    /// <summary>
+    /// Documentation for this property.
+    /// </summary>
+    /// <remarks>
+    /// This is an optional field only present when <see cref="GodotApi"/> was generated with documentation included.
+    /// </remarks>
+    [JsonPropertyName("description")]
+    public string? Description { get; set; }
+
     /// <inheritdoc/>
     public override string ToString() =>
         $"{Type} {Name} {{ get: {Getter}, set: {Setter} }}";

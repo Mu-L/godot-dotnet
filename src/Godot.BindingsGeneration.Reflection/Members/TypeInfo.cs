@@ -384,6 +384,7 @@ public class TypeInfo : VisibleMemberInfo, IEquatable<TypeInfo>
 
         // If the types have the same fully-qualified name they should be the same type.
         return Name == other.Name && Namespace == other.Namespace
+            && ContainingType == other.ContainingType
             && IsPointerType == other.IsPointerType
             && GenericTypeArgumentCount == other.GenericTypeArgumentCount
             && _genericTypeArguments.SequenceEqual(other._genericTypeArguments);

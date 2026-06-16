@@ -475,7 +475,7 @@ public static class NamingUtils
 
         for (int i = 0; i < engineEnum.Values.Length; i++)
         {
-            var (name, value) = engineEnum.Values[i];
+            string name = engineEnum.Values[i].Name;
             int currentPrefixLength = prefixLength;
 
             string[] parts = name.Split('_');
@@ -508,7 +508,7 @@ public static class NamingUtils
                 nameBuilder.Append(parts[j]);
             }
 
-            @enum.Values[i] = (SnakeToPascalCase(nameBuilder.ToString()), value);
+            @enum.DeclaredFields[i].Name = SnakeToPascalCase(nameBuilder.ToString());
         }
     }
 
@@ -522,7 +522,8 @@ public static class NamingUtils
     /// </remarks>
     /// <param name="engineEnum">Godot enum information that is the source of truth.</param>
     /// <param name="enum">C# enum information that will be modified.</param>
-    public static void RemoveMaxConstant(GodotEnumInfo engineEnum, EnumInfo @enum)
+    /// <param name="enumConstantsByIndex">List of enum constants by the engine index.</param>
+    public static void RemoveMaxConstant(GodotEnumInfo engineEnum, EnumInfo @enum, List<FieldInfo> enumConstantsByIndex)
     {
         int maxEnumFieldIndex = 0;
         GodotEnumValueInfo? maxEnumField = null;
@@ -545,8 +546,39 @@ public static class NamingUtils
 
         if (maxEnumField is not null)
         {
-            @enum.Values.RemoveAt(maxEnumFieldIndex);
+            @enum.DeclaredFields.Remove(enumConstantsByIndex[maxEnumFieldIndex]);
         }
+    }
+
+    /// <summary>
+    /// Remove a specific constant from an enum. This modifies the enum in place.
+    /// </summary>
+    /// <param name="engineEnum">Godot enum information that is the source of truth.</param>
+    /// <param name="enum">C# enum information that will be modified.</param>
+    /// <param name="enumConstantsByIndex">List of enum constants by the engine index.</param>
+    /// <param name="selector">A function to select the constant to remove.</param>
+    public static void RemoveConstant(GodotEnumInfo engineEnum, EnumInfo @enum, List<FieldInfo> enumConstantsByIndex, Func<GodotEnumValueInfo, bool> selector)
+    {
+        for (int i = 0; i < engineEnum.Values.Length; i++)
+        {
+            if (selector(engineEnum.Values[i]))
+            {
+                @enum.DeclaredFields.Remove(enumConstantsByIndex[i]);
+                break;
+            }
+        }
+    }
+
+    /// <summary>
+    /// Remove a specific constant from an enum. This modifies the enum in place.
+    /// </summary>
+    /// <param name="engineEnum">Godot enum information that is the source of truth.</param>
+    /// <param name="enum">C# enum information that will be modified.</param>
+    /// <param name="enumConstantsByIndex">List of enum constants by the engine index.</param>
+    /// <param name="engineConstantIndex">The index of the constant to remove.</param>
+    public static void RemoveConstant(GodotEnumInfo engineEnum, EnumInfo @enum, List<FieldInfo> enumConstantsByIndex, int engineConstantIndex)
+    {
+        @enum.DeclaredFields.Remove(enumConstantsByIndex[engineConstantIndex]);
     }
 
     private static bool MayBeCamelOrPascalCase(ReadOnlySpan<char> value)

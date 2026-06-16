@@ -18,6 +18,15 @@ public sealed class GodotConstructorInfo
     [JsonPropertyName("arguments")]
     public GodotArgumentInfo[] Arguments { get; set; } = [];
 
+    /// <summary>
+    /// Documentation for this constructor.
+    /// </summary>
+    /// <remarks>
+    /// This is an optional field only present when <see cref="GodotApi"/> was generated with documentation included.
+    /// </remarks>
+    [JsonPropertyName("description")]
+    public string? Description { get; set; }
+
     /// <inheritdoc/>
     public override string ToString() => $"constructor({string.Join(", ", (object[])Arguments)})";
 }

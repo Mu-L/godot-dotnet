@@ -21,6 +21,7 @@ internal sealed class UtilityFunctionsBindingsDataCollector : BindingsDataCollec
             {
                 VisibilityAttributes = VisibilityAttributes.Public,
                 IsStatic = true,
+                Documentation = context.Options.IncludeDocumentation ? engineMethod.Description : null,
             };
 
             if (!string.IsNullOrEmpty(engineMethod.ReturnType))

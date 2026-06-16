@@ -24,6 +24,15 @@ public sealed class GodotOperatorInfo
     [JsonPropertyName("return_type")]
     public required string ReturnType { get; set; }
 
+    /// <summary>
+    /// Documentation for this operator.
+    /// </summary>
+    /// <remarks>
+    /// This is an optional field only present when <see cref="GodotApi"/> was generated with documentation included.
+    /// </remarks>
+    [JsonPropertyName("description")]
+    public string? Description { get; set; }
+
     /// <inheritdoc/>
     public override string ToString() =>
         $"{ReturnType} operator {Name}{(RightType is not null ? $"({RightType})" : "")}";

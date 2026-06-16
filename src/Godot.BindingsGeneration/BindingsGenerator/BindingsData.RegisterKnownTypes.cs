@@ -271,6 +271,213 @@ partial class BindingsData
         RegisterDefaultValueParser(KnownTypes.GodotDictionaryGeneric, new GodotDictionaryDefaultValueParser(KnownTypes.GodotDictionaryGeneric));
         RegisterDefaultValueParser(KnownTypes.NativeGodotDictionary, new GodotDictionaryDefaultValueParser(KnownTypes.NativeGodotDictionary));
 
+        // MEMBER MAPPINGS: We also need to register member mappings for some APIs that aren't generated.
+        // We don't need to add every API here, only the ones that are referenced in the documentation.
+        // For some APIs we can reference BCL APIs instead, but keep in mind the documentation is often
+        // worded in a way that is specific to Godot, for example "String.length" is not the same as
+        // "System.String.Length" because Godot Strings are UTF-32 and System.String is UTF-16, so the
+        // documentation may mention this when talking about the length which would be misleading if we
+        // referenced the BCL API instead.
+
+        // Members (built-in types).
+        RegisterMemberMapping(KnownTypes.GodotAabb, "position", "Position");
+        RegisterMemberMapping(KnownTypes.GodotAabb, "size", "Size");
+        RegisterMemberMapping(KnownTypes.GodotAabb, "end", "End");
+        RegisterMemberMapping(KnownTypes.GodotBasis, "IDENTITY", "Identity");
+        RegisterMemberMapping(KnownTypes.GodotBasis, "FLIP_X", "FlipX");
+        RegisterMemberMapping(KnownTypes.GodotBasis, "FLIP_Y", "FlipY");
+        RegisterMemberMapping(KnownTypes.GodotBasis, "FLIP_Z", "FlipZ");
+        RegisterMemberMapping(KnownTypes.GodotCallable, "bind", "Bind");
+        RegisterMemberMapping(KnownTypes.GodotCallable, "unbind", "Unbind");
+        RegisterMemberMapping(KnownTypes.GodotCallable, "call", "Call");
+        RegisterMemberMapping(KnownTypes.GodotCallable, "call_deferred", "CallDeferred");
+        RegisterMemberMapping(KnownTypes.GodotColor, "r", "R");
+        RegisterMemberMapping(KnownTypes.GodotColor, "g", "G");
+        RegisterMemberMapping(KnownTypes.GodotColor, "b", "B");
+        RegisterMemberMapping(KnownTypes.GodotColor, "a", "A");
+        RegisterMemberMapping(KnownTypes.GodotColor, "r8", "R8");
+        RegisterMemberMapping(KnownTypes.GodotColor, "g8", "G8");
+        RegisterMemberMapping(KnownTypes.GodotColor, "b8", "B8");
+        RegisterMemberMapping(KnownTypes.GodotColor, "a8", "A8");
+        RegisterMemberMapping(KnownTypes.GodotColor, "h", "H");
+        RegisterMemberMapping(KnownTypes.GodotColor, "s", "S");
+        RegisterMemberMapping(KnownTypes.GodotColor, "v", "V");
+        RegisterMemberMapping(KnownTypes.GodotNodePath, "get_as_property_path", "GetAsPropertyPath");
+        RegisterMemberMapping(KnownTypes.GodotPlane, "normal", "Normal");
+        RegisterMemberMapping(KnownTypes.GodotPlane, "d", "D");
+        RegisterMemberMapping(KnownTypes.GodotPlane, "x", "X");
+        RegisterMemberMapping(KnownTypes.GodotPlane, "y", "Y");
+        RegisterMemberMapping(KnownTypes.GodotPlane, "z", "Z");
+        RegisterMemberMapping(KnownTypes.GodotPlane, "PLANE_YZ", "PlaneYZ");
+        RegisterMemberMapping(KnownTypes.GodotPlane, "PLANE_XZ", "PlaneXZ");
+        RegisterMemberMapping(KnownTypes.GodotPlane, "PLANE_XY", "PlaneXY");
+        RegisterMemberMapping(KnownTypes.GodotProjection, "ZERO", "Zero");
+        RegisterMemberMapping(KnownTypes.GodotProjection, "IDENTITY", "Identity");
+        RegisterMemberMapping(KnownTypes.GodotQuaternion, "IDENTITY", "Identity");
+        RegisterMemberMapping(KnownTypes.GodotQuaternion, "slerp", "Slerp");
+        RegisterMemberMapping(KnownTypes.GodotRect2, "position", "Position");
+        RegisterMemberMapping(KnownTypes.GodotRect2, "size", "Size");
+        RegisterMemberMapping(KnownTypes.GodotRect2, "end", "End");
+        RegisterMemberMapping(KnownTypes.GodotRect2I, "position", "Position");
+        RegisterMemberMapping(KnownTypes.GodotRect2I, "size", "Size");
+        RegisterMemberMapping(KnownTypes.GodotRect2I, "end", "End");
+        RegisterMemberMapping(KnownTypes.GodotTransform2D, "x", "X");
+        RegisterMemberMapping(KnownTypes.GodotTransform2D, "y", "Y");
+        RegisterMemberMapping(KnownTypes.GodotTransform2D, "origin", "Origin");
+        RegisterMemberMapping(KnownTypes.GodotTransform2D, "IDENTITY", "Identity");
+        RegisterMemberMapping(KnownTypes.GodotTransform2D, "FLIP_X", "FlipX");
+        RegisterMemberMapping(KnownTypes.GodotTransform2D, "FLIP_Y", "FlipY");
+        RegisterMemberMapping(KnownTypes.GodotTransform2D, "get_scale", "Scale");
+        RegisterMemberMapping(KnownTypes.GodotTransform3D, "basis", "Basis");
+        RegisterMemberMapping(KnownTypes.GodotTransform3D, "origin", "Origin");
+        RegisterMemberMapping(KnownTypes.GodotTransform3D, "IDENTITY", "Identity");
+        RegisterMemberMapping(KnownTypes.GodotTransform3D, "FLIP_X", "FlipX");
+        RegisterMemberMapping(KnownTypes.GodotTransform3D, "FLIP_Y", "FlipY");
+        RegisterMemberMapping(KnownTypes.GodotTransform3D, "FLIP_Z", "FlipZ");
+        RegisterMemberMapping(KnownTypes.GodotTransform3D, "affine_inverse", "AffineInverse");
+        RegisterMemberMapping(KnownTypes.GodotTransform3D, "orthonormalized", "Orthonormalized");
+        RegisterMemberMapping(KnownTypes.GodotVector2, "x", "X");
+        RegisterMemberMapping(KnownTypes.GodotVector2, "y", "Y");
+        RegisterMemberMapping(KnownTypes.GodotVector2, "ZERO", "Zero");
+        RegisterMemberMapping(KnownTypes.GodotVector2, "ONE", "One");
+        RegisterMemberMapping(KnownTypes.GodotVector2, "INF", "Inf");
+        RegisterMemberMapping(KnownTypes.GodotVector2, "UP", "Up");
+        RegisterMemberMapping(KnownTypes.GodotVector2, "DOWN", "Down");
+        RegisterMemberMapping(KnownTypes.GodotVector2, "RIGHT", "Right");
+        RegisterMemberMapping(KnownTypes.GodotVector2, "LEFT", "Left");
+        RegisterMemberMapping(KnownTypes.GodotVector2I, "x", "X");
+        RegisterMemberMapping(KnownTypes.GodotVector2I, "y", "Y");
+        RegisterMemberMapping(KnownTypes.GodotVector2I, "MIN", "MinValue");
+        RegisterMemberMapping(KnownTypes.GodotVector2I, "MAX", "MaxValue");
+        RegisterMemberMapping(KnownTypes.GodotVector2I, "ZERO", "Zero");
+        RegisterMemberMapping(KnownTypes.GodotVector2I, "ONE", "One");
+        RegisterMemberMapping(KnownTypes.GodotVector2I, "UP", "Up");
+        RegisterMemberMapping(KnownTypes.GodotVector2I, "DOWN", "Down");
+        RegisterMemberMapping(KnownTypes.GodotVector2I, "RIGHT", "Right");
+        RegisterMemberMapping(KnownTypes.GodotVector2I, "LEFT", "Left");
+        RegisterMemberMapping(KnownTypes.GodotVector3, "x", "X");
+        RegisterMemberMapping(KnownTypes.GodotVector3, "y", "Y");
+        RegisterMemberMapping(KnownTypes.GodotVector3, "z", "Z");
+        RegisterMemberMapping(KnownTypes.GodotVector3, "ZERO", "Zero");
+        RegisterMemberMapping(KnownTypes.GodotVector3, "ONE", "One");
+        RegisterMemberMapping(KnownTypes.GodotVector3, "INF", "Inf");
+        RegisterMemberMapping(KnownTypes.GodotVector3, "UP", "Up");
+        RegisterMemberMapping(KnownTypes.GodotVector3, "DOWN", "Down");
+        RegisterMemberMapping(KnownTypes.GodotVector3, "RIGHT", "Right");
+        RegisterMemberMapping(KnownTypes.GodotVector3, "LEFT", "Left");
+        RegisterMemberMapping(KnownTypes.GodotVector3, "FORWARD", "Forward");
+        RegisterMemberMapping(KnownTypes.GodotVector3, "BACK", "Back");
+        RegisterMemberMapping(KnownTypes.GodotVector3, "MODEL_LEFT", "ModelLeft");
+        RegisterMemberMapping(KnownTypes.GodotVector3, "MODEL_RIGHT", "ModelRight");
+        RegisterMemberMapping(KnownTypes.GodotVector3, "MODEL_TOP", "ModelTop");
+        RegisterMemberMapping(KnownTypes.GodotVector3, "MODEL_BOTTOM", "ModelBottom");
+        RegisterMemberMapping(KnownTypes.GodotVector3, "MODEL_FRONT", "ModelFront");
+        RegisterMemberMapping(KnownTypes.GodotVector3, "MODEL_REAR", "ModelRear");
+        RegisterMemberMapping(KnownTypes.GodotVector3I, "x", "X");
+        RegisterMemberMapping(KnownTypes.GodotVector3I, "y", "Y");
+        RegisterMemberMapping(KnownTypes.GodotVector3I, "z", "Z");
+        RegisterMemberMapping(KnownTypes.GodotVector3I, "MIN", "MinValue");
+        RegisterMemberMapping(KnownTypes.GodotVector3I, "MAX", "MaxValue");
+        RegisterMemberMapping(KnownTypes.GodotVector3I, "ZERO", "Zero");
+        RegisterMemberMapping(KnownTypes.GodotVector3I, "ONE", "One");
+        RegisterMemberMapping(KnownTypes.GodotVector3I, "UP", "Up");
+        RegisterMemberMapping(KnownTypes.GodotVector3I, "DOWN", "Down");
+        RegisterMemberMapping(KnownTypes.GodotVector3I, "RIGHT", "Right");
+        RegisterMemberMapping(KnownTypes.GodotVector3I, "LEFT", "Left");
+        RegisterMemberMapping(KnownTypes.GodotVector4, "x", "X");
+        RegisterMemberMapping(KnownTypes.GodotVector4, "y", "Y");
+        RegisterMemberMapping(KnownTypes.GodotVector4, "z", "Z");
+        RegisterMemberMapping(KnownTypes.GodotVector4, "w", "W");
+        RegisterMemberMapping(KnownTypes.GodotVector4, "ZERO", "Zero");
+        RegisterMemberMapping(KnownTypes.GodotVector4, "ONE", "One");
+        RegisterMemberMapping(KnownTypes.GodotVector4, "INF", "Inf");
+        RegisterMemberMapping(KnownTypes.GodotVector4I, "x", "X");
+        RegisterMemberMapping(KnownTypes.GodotVector4I, "y", "Y");
+        RegisterMemberMapping(KnownTypes.GodotVector4I, "z", "Z");
+        RegisterMemberMapping(KnownTypes.GodotVector4I, "w", "W");
+        RegisterMemberMapping(KnownTypes.GodotVector4I, "MIN", "MinValue");
+        RegisterMemberMapping(KnownTypes.GodotVector4I, "MAX", "MaxValue");
+        RegisterMemberMapping(KnownTypes.GodotVector4I, "ZERO", "Zero");
+        RegisterMemberMapping(KnownTypes.GodotVector4I, "ONE", "One");
+
+        // Members (collections).
+        RegisterMemberMapping(KnownTypes.GodotArray, "size", "Count");
+        RegisterMemberMapping(KnownTypes.GodotArray, "shuffle", "Shuffle");
+        RegisterMemberMapping(KnownTypes.GodotDictionary, "size", "Count");
+        RegisterMemberMapping(KnownTypes.GodotPackedByteArray, "size", "Count");
+        RegisterMemberMapping(KnownTypes.GodotPackedInt32Array, "size", "Count");
+        RegisterMemberMapping(KnownTypes.GodotPackedInt64Array, "size", "Count");
+        RegisterMemberMapping(KnownTypes.GodotPackedFloat32Array, "size", "Count");
+        RegisterMemberMapping(KnownTypes.GodotPackedFloat64Array, "size", "Count");
+        RegisterMemberMapping(KnownTypes.GodotPackedStringArray, "size", "Count");
+        RegisterMemberMapping(KnownTypes.GodotPackedVector2Array, "size", "Count");
+        RegisterMemberMapping(KnownTypes.GodotPackedVector3Array, "size", "Count");
+        RegisterMemberMapping(KnownTypes.GodotPackedColorArray, "size", "Count");
+        RegisterMemberMapping(KnownTypes.GodotPackedVector4Array, "size", "Count");
+        RegisterMemberMapping(KnownTypes.GodotPackedInt32Array, "to_byte_array", "ToPackedByteArray");
+        RegisterMemberMapping(KnownTypes.GodotPackedInt64Array, "to_byte_array", "ToPackedByteArray");
+        RegisterMemberMapping(KnownTypes.GodotPackedFloat32Array, "to_byte_array", "ToPackedByteArray");
+        RegisterMemberMapping(KnownTypes.GodotPackedFloat64Array, "to_byte_array", "ToPackedByteArray");
+        RegisterMemberMapping(KnownTypes.GodotPackedStringArray, "to_byte_array", "ToPackedByteArray");
+        RegisterMemberMapping(KnownTypes.GodotPackedVector2Array, "to_byte_array", "ToPackedByteArray");
+        RegisterMemberMapping(KnownTypes.GodotPackedVector3Array, "to_byte_array", "ToPackedByteArray");
+        RegisterMemberMapping(KnownTypes.GodotPackedColorArray, "to_byte_array", "ToPackedByteArray");
+        RegisterMemberMapping(KnownTypes.GodotPackedVector4Array, "to_byte_array", "ToPackedByteArray");
+
+        // Members (Object).
+        RegisterMemberMapping(KnownTypes.GodotObject, "free", "Free");
+        RegisterMemberMapping(KnownTypes.GodotObject, "to_string", "ToString");
+        RegisterMemberMapping(KnownTypes.GodotObject, "_get", "_Get");
+        RegisterMemberMapping(KnownTypes.GodotObject, "_set", "_Set");
+        RegisterMemberMapping(KnownTypes.GodotObject, "_get_property_list", "_GetPropertyList");
+        RegisterMemberMapping(KnownTypes.GodotObject, "_property_can_revert", "_PropertyCanRevert");
+        RegisterMemberMapping(KnownTypes.GodotObject, "_property_get_revert", "_PropertyGetRevert");
+        RegisterMemberMapping(KnownTypes.GodotObject, "_validate_property", "_ValidateProperty");
+        RegisterMemberMapping(KnownTypes.GodotObject, "_notification", "_Notification");
+        RegisterGlobalMemberMapping(KnownTypes.GodotObject, "instance_from_id", "InstanceFromId");
+        RegisterMemberMapping(KnownTypes.GodotObject, "get_instance_id", "GetInstanceId");
+        RegisterGlobalMemberMapping(KnownTypes.GodotObject, "is_instance_valid", "IsInstanceValid");
+
+        // Members (global scope).
+        RegisterGlobalMemberMappingNoType("@GDScript.assert", "global::System.Diagnostics.Debug.Assert");
+        RegisterGlobalMemberMappingNoType("@GDScript.TAU", "global::Godot.Mathf.Tau");
+        RegisterGlobalMemberMappingNoType("@GDScript.PI", "global::Godot.Mathf.Pi");
+        RegisterGlobalMemberMappingNoType("@GDScript.INF", "global::Godot.Mathf.Inf");
+        RegisterGlobalMemberMappingNoType("@GDScript.NAN", "global::Godot.Mathf.NaN");
+        RegisterGlobalMemberMappingNoType("@GlobalScope.abs", "global::Godot.Mathf.Abs");
+        RegisterGlobalMemberMappingNoType("@GlobalScope.atan2", "global::Godot.Mathf.Atan2");
+        RegisterGlobalMemberMappingNoType("@GlobalScope.clamp", "global::Godot.Mathf.Clamp");
+        RegisterGlobalMemberMappingNoType("@GlobalScope.db_to_linear", "global::Godot.Mathf.DbToLinear");
+        RegisterGlobalMemberMappingNoType("@GlobalScope.deg_to_rad", "global::Godot.Mathf.DegtoRad");
+        RegisterGlobalMemberMappingNoType("@GlobalScope.ease", "global::Godot.Mathf.Ease");
+        RegisterGlobalMemberMappingNoType("@GlobalScope.is_equal_approx", "global::Godot.Mathf.IsEqualApprox");
+        RegisterGlobalMemberMappingNoType("@GlobalScope.is_finite", "global::Godot.Mathf.IsFinite");
+        RegisterGlobalMemberMappingNoType("@GlobalScope.is_inf", "global::Godot.Mathf.IsInf");
+        RegisterGlobalMemberMappingNoType("@GlobalScope.is_nan", "global::Godot.Mathf.IsNaN");
+        RegisterGlobalMemberMappingNoType("@GlobalScope.is_zero_approx", "global::Godot.Mathf.IsZeroApprox");
+        RegisterGlobalMemberMappingNoType("@GlobalScope.lerp", "global::Godot.Mathf.Lerp");
+        RegisterGlobalMemberMappingNoType("@GlobalScope.linear_to_db", "global::Godot.Mathf.LinearToDb");
+        RegisterGlobalMemberMappingNoType("@GlobalScope.posmod", "global::Godot.Mathf.PosMod");
+        RegisterGlobalMemberMappingNoType("@GlobalScope.fposmod", "global::Godot.Mathf.PosMod");
+        RegisterGlobalMemberMappingNoType("@GlobalScope.rad_to_deg", "global::Godot.Mathf.RadToDeg");
+        RegisterGlobalMemberMappingNoType("@GlobalScope.remap", "global::Godot.Mathf.Remap");
+        RegisterGlobalMemberMappingNoType("@GlobalScope.sign", "global::Godot.Mathf.Sign");
+        RegisterGlobalMemberMappingNoType("@GlobalScope.bytes_to_var", "global::Godot.GD.BytesToVar");
+        RegisterGlobalMemberMappingNoType("@GlobalScope.type_convert", "global::Godot.GD.TypeConvert");
+        RegisterGlobalMemberMappingNoType("@GDScript.hash", "global::Godot.GD.Hash");
+        RegisterGlobalMemberMappingNoType("@GDScript.load", "global::Godot.GD.Load");
+        RegisterGlobalMemberMappingNoType("@GlobalScope.print", "global::Godot.GD.Print");
+        RegisterGlobalMemberMappingNoType("@GlobalScope.print_verbose", "global::Godot.GD.PrintVerbose");
+        RegisterGlobalMemberMappingNoType("@GlobalScope.push_error", "global::Godot.GD.PushError");
+        RegisterGlobalMemberMappingNoType("@GlobalScope.push_warning", "global::Godot.GD.PushWarning");
+        RegisterGlobalMemberMappingNoType("@GlobalScope.randi", "global::Godot.GD.Randi");
+        RegisterGlobalMemberMappingNoType("@GlobalScope.seed", "global::Godot.GD.Seed");
+        RegisterGlobalMemberMappingNoType("@GlobalScope.str", "global::System.Object.ToString");
+        RegisterGlobalMemberMappingNoType("@GlobalScope.str_to_var", "global::Godot.GD.StrToVar");
+        RegisterGlobalMemberMappingNoType("@GlobalScope.var_to_bytes", "global::Godot.GD.VarToBytes");
+        RegisterGlobalMemberMappingNoType("@GlobalScope.var_to_str", "global::Godot.GD.VarToStr");
+        RegisterGlobalMemberMappingNoType("@GlobalScope.weakref", "global::Godot.GodotObject.WeakRef");
+
         void RegisterType(string engineTypeName, TypeInfo type, TypeInfo? unmanagedType = null)
         {
             _typeDB.RegisterTypeName(engineTypeName, type);
@@ -338,6 +545,21 @@ partial class BindingsData
         void RegisterDefaultValueParser(TypeInfo type, DefaultValueParser defaultValueParser)
         {
             _typeDB.RegisterDefaultValueParser(type, defaultValueParser);
+        }
+
+        void RegisterMemberMapping(TypeInfo type, string engineMemberName, string memberName)
+        {
+            _typeDB.RegisterMemberMapping(type, engineMemberName, $"{type.FullNameWithGlobal}.{memberName}");
+        }
+
+        void RegisterGlobalMemberMapping(TypeInfo type, string fullyQualifiedEngineMemberName, string memberName)
+        {
+            _typeDB.RegisterGlobalMemberMapping(fullyQualifiedEngineMemberName, $"{type.FullNameWithGlobal}.{memberName}");
+        }
+
+        void RegisterGlobalMemberMappingNoType(string fullyQualifiedEngineMemberName, string fullyQualifiedMemberName)
+        {
+            _typeDB.RegisterGlobalMemberMapping(fullyQualifiedEngineMemberName, fullyQualifiedMemberName);
         }
     }
 }

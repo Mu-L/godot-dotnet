@@ -11,6 +11,8 @@ internal sealed partial class BindingsData
 
     private readonly TypeDB _typeDB = new();
 
+    private readonly XmlDocConverter _xmlDocConverter;
+
     /// <summary>
     /// Collection of C# type information that was created from <see cref="GodotApi"/>.
     /// This type information will be used to generate C# types.
@@ -52,6 +54,8 @@ internal sealed partial class BindingsData
     {
         Header = header;
         RegisterKnownTypes();
+
+        _xmlDocConverter = new XmlDocConverter(_typeDB);
     }
 
     /// <summary>
@@ -95,6 +99,14 @@ internal sealed partial class BindingsData
         {
             collector.Populate(context);
         }
+
+        // Now that all types have been initialized and populated, we can convert the documentation
+        // from BBCode to XMLDoc format. Documentation may reference other types and members, so
+        // we need to wait until all types are populated to ensure all references can be resolved.
+        if (context.Options.IncludeDocumentation)
+        {
+            ConvertDocumentation();
+        }
     }
 
     private void RegisterSingletons(GodotApi api)
@@ -102,6 +114,75 @@ internal sealed partial class BindingsData
         foreach (var engineSingleton in api.Singletons)
         {
             _singletons[engineSingleton.Type] = engineSingleton;
+        }
+    }
+
+    private void ConvertDocumentation()
+    {
+        foreach (var type in _generatedTypes)
+        {
+            ConvertDocumentationForType(type, _xmlDocConverter);
+        }
+
+        static void ConvertDocumentationForType(TypeInfo type, XmlDocConverter converter)
+        {
+            TypeInfo? currentType = type;
+            if (type.IsEnum)
+            {
+                // For enums we want to use the containing type as the current type when converting documentation
+                // because enum members reference other members relative to the containing type.
+                currentType = type.ContainingType;
+            }
+
+            if (!string.IsNullOrEmpty(type.Documentation))
+            {
+                type.Documentation = converter.Convert(type.Documentation, currentType);
+            }
+
+            foreach (var nestedType in type.NestedTypes)
+            {
+                ConvertDocumentationForType(nestedType, converter);
+            }
+
+            foreach (var constructor in type.DeclaredConstructors)
+            {
+                if (!string.IsNullOrEmpty(constructor.Documentation))
+                {
+                    constructor.Documentation = converter.Convert(constructor.Documentation, currentType);
+                }
+            }
+
+            foreach (var method in type.DeclaredMethods)
+            {
+                if (!string.IsNullOrEmpty(method.Documentation))
+                {
+                    method.Documentation = converter.Convert(method.Documentation, currentType);
+                }
+            }
+
+            foreach (var property in type.DeclaredProperties)
+            {
+                if (!string.IsNullOrEmpty(property.Documentation))
+                {
+                    property.Documentation = converter.Convert(property.Documentation, currentType);
+                }
+            }
+
+            foreach (var field in type.DeclaredFields)
+            {
+                if (!string.IsNullOrEmpty(field.Documentation))
+                {
+                    field.Documentation = converter.Convert(field.Documentation, currentType);
+                }
+            }
+
+            foreach (var @event in type.DeclaredEvents)
+            {
+                if (!string.IsNullOrEmpty(@event.Documentation))
+                {
+                    @event.Documentation = converter.Convert(@event.Documentation, currentType);
+                }
+            }
         }
     }
 }

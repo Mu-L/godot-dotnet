@@ -24,6 +24,7 @@ internal sealed class GlobalConstantsBindingsDataCollector : BindingsDataCollect
                 VisibilityAttributes = VisibilityAttributes.Public,
                 IsLiteral = true,
                 DefaultValue = engineConstant.Value,
+                Documentation = context.Options.IncludeDocumentation ? engineConstant.Description : null,
             };
             globals.DeclaredFields.Add(field);
         }

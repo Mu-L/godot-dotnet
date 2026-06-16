@@ -32,6 +32,15 @@ public sealed class BindingsGeneratorOptions
         };
 
     /// <summary>
+    /// Whether the generated bindings should include documentation comments found in the API dump.
+    /// </summary>
+    /// <remarks>
+    /// This is enabled by default, but can be disabled if documentation is not needed or causing
+    /// issues during generation. Disabling documentation can also speed up the generation process.
+    /// </remarks>
+    public bool IncludeDocumentation { get; init; } = true;
+
+    /// <summary>
     /// The namespace to use for the generated API.
     /// </summary>
     /// <remarks>

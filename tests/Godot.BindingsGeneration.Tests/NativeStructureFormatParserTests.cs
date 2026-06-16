@@ -1,8 +1,7 @@
 using System;
 using System.Collections.Generic;
-using Godot.BindingsGeneration;
 
-namespace Godot.Common.Tests;
+namespace Godot.BindingsGeneration.Tests;
 
 public class NativeStructureFormatParserTests
 {

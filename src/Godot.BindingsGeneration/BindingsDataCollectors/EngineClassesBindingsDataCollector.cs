@@ -38,6 +38,9 @@ internal sealed class EngineClassesBindingsDataCollector : BindingsDataCollector
                 VisibilityAttributes = VisibilityAttributes.Public,
                 TypeAttributes = TypeAttributes.ReferenceType,
                 IsPartial = true,
+                Documentation = context.Options.IncludeDocumentation
+                    ? engineClass.Description ?? engineClass.BriefDescription
+                    : null,
             };
 
             if (type.Name != engineClass.Name)
@@ -307,6 +310,7 @@ internal sealed class EngineClassesBindingsDataCollector : BindingsDataCollector
             {
                 VisibilityAttributes = VisibilityAttributes.Public,
                 IsStatic = engineMethod.IsStatic,
+                Documentation = context.Options.IncludeDocumentation ? engineMethod.Description : null,
             };
             AddEngineClassMethodByEngineName(type, engineMethod.Name, method);
 
@@ -361,6 +365,7 @@ internal sealed class EngineClassesBindingsDataCollector : BindingsDataCollector
             }
 
             type.DeclaredMethods.Add(method);
+            context.TypeDB.RegisterMemberMapping(type, engineMethod.Name, method);
 
             // Only non-virtual methods have a MethodBind to call.
             if (!engineMethod.IsVirtual)
@@ -416,6 +421,7 @@ internal sealed class EngineClassesBindingsDataCollector : BindingsDataCollector
             {
                 VisibilityAttributes = VisibilityAttributes.Public,
                 IsNew = _propertiesAllowedToShadowMember.Contains($"{type.Name}.{propertyName}"),
+                Documentation = context.Options.IncludeDocumentation ? engineProperty.Description : null,
             };
 
             // TODO: Some methods that are used as property accessors don't seem to be exposed in extensions_api.json
@@ -568,6 +574,7 @@ internal sealed class EngineClassesBindingsDataCollector : BindingsDataCollector
             Debug.Assert(property.Type.GenericTypeDefinition != KnownTypes.SystemReadOnlySpan);
 
             type.DeclaredProperties.Add(property);
+            context.TypeDB.RegisterMemberMapping(type, engineProperty.Name, property);
         }
     }
 
@@ -642,6 +649,7 @@ internal sealed class EngineClassesBindingsDataCollector : BindingsDataCollector
             var @event = new EventInfo(eventName, eventHandlerType)
             {
                 VisibilityAttributes = VisibilityAttributes.Public,
+                Documentation = context.Options.IncludeDocumentation ? engineSignal.Description : null,
             };
             @event.AddAccessor = new MethodInfo($"add_{@event.Name}")
             {
@@ -682,6 +690,7 @@ internal sealed class EngineClassesBindingsDataCollector : BindingsDataCollector
                 }),
             };
             type.DeclaredEvents.Add(@event);
+            context.TypeDB.RegisterMemberMapping(type, engineSignal.Name, @event);
 
             var raiseEventMethod = new MethodInfo($"EmitSignal{@event.Name}")
             {
@@ -745,23 +754,52 @@ internal sealed class EngineClassesBindingsDataCollector : BindingsDataCollector
                 continue;
             }
 
-            foreach (var (name, value) in engineEnum.Values)
+            // IMPORTANT: We also register nested types so they can be found by their engine name.
+            // This is needed because, while nested types are registered in TypeDB, when looking up
+            // from the documentation we often don't have the containing type's engine name.
+            context.TypeDB.RegisterMemberMapping(type, engineEnum.Name, @enum);
+
+            Dictionary<FieldInfo, string> enumMemberMappings = [];
+            List<FieldInfo> enumConstantsByIndex = [];
+            foreach (var engineConstant in engineEnum.Values)
             {
-                @enum.Values.Add((NamingUtils.SnakeToPascalCase(name), value));
+                var constant = new FieldInfo(NamingUtils.SnakeToPascalCase(engineConstant.Name), @enum.UnderlyingType ?? KnownTypes.SystemInt32)
+                {
+                    VisibilityAttributes = VisibilityAttributes.Public,
+                    IsLiteral = true,
+                    DefaultValue = $"{engineConstant.Value}",
+                    Documentation = context.Options.IncludeDocumentation ? engineConstant.Description : null,
+                };
+
+                @enum.DeclaredFields.Add(constant);
+                enumMemberMappings[constant] = engineConstant.Name;
+                enumConstantsByIndex.Add(constant);
             }
 
             int enumPrefix = NamingUtils.DetermineEnumPrefix(engineEnum);
 
             NamingUtils.ApplyPrefixToEnumConstants(engineEnum, @enum, enumPrefix);
 
-            // HARDCODED: Some enums have a '_MAX' constant that shouldn't be removed.
-            if ((engineClass.Name == "AudioEffectSpectrumAnalyzerInstance" && engineEnum.Name == "MagnitudeMode")
-             || (engineClass.Name == "SurfaceTool" && engineEnum.Name == "CustomFormat"))
+            if (!ShouldPreserveMaxContants())
             {
-                continue;
+                NamingUtils.RemoveMaxConstant(engineEnum, @enum, enumConstantsByIndex);
             }
 
-            NamingUtils.RemoveMaxConstant(engineEnum, @enum);
+            // IMPORTANT: We only register the enum member mappings after we have processed the enum constants.
+            foreach (var constant in @enum.DeclaredFields)
+            {
+                if (enumMemberMappings.TryGetValue(constant, out string? engineMemberName))
+                {
+                    context.TypeDB.RegisterMemberMapping(@enum, engineMemberName, constant);
+                }
+            }
+
+            bool ShouldPreserveMaxContants()
+            {
+                // HARDCODED: Some enums have a '_MAX' constant that shouldn't be removed.
+                return (engineClass.Name == "AudioEffectSpectrumAnalyzerInstance" && engineEnum.Name == "MagnitudeMode")
+                    || (engineClass.Name == "SurfaceTool" && engineEnum.Name == "CustomFormat");
+            }
         }
 
         // Populate constants.
@@ -772,9 +810,11 @@ internal sealed class EngineClassesBindingsDataCollector : BindingsDataCollector
                 VisibilityAttributes = VisibilityAttributes.Public,
                 IsLiteral = true,
                 DefaultValue = engineConstant.Value,
+                Documentation = context.Options.IncludeDocumentation ? engineConstant.Description : null,
             };
 
             type.DeclaredFields.Add(constant);
+            context.TypeDB.RegisterMemberMapping(type, engineConstant.Name, constant);
         }
 
         // Check and fix member conflicts.

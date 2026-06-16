@@ -105,25 +105,33 @@ public static partial class BindingsGenerator
     {
         if (type is DelegateInfo delegateType)
         {
+            writer.WriteDocumentation(delegateType);
             writer.WriteAttributes(delegateType);
             writer.WriteDelegateDeclaration(delegateType);
             writer.WriteLine(';');
         }
         else if (type is EnumInfo enumType)
         {
+            writer.WriteDocumentation(enumType);
             writer.WriteAttributes(enumType);
             writer.WriteTypeDeclaration(enumType);
             writer.WriteLine();
 
             writer.OpenBlock();
-            foreach (var (name, value) in enumType.Values)
+            foreach (var field in enumType.DeclaredFields)
             {
-                writer.WriteLine($"{name} = {value},");
+                // All enum members must be constants.
+                Debug.Assert(field.IsLiteral);
+
+                writer.WriteDocumentation(field);
+                writer.WriteAttributes(field);
+                writer.WriteLine($"{field.Name} = {field.DefaultValue},");
             }
             writer.CloseBlock();
         }
         else
         {
+            writer.WriteDocumentation(type);
             writer.WriteAttributes(type);
             writer.WriteTypeDeclaration(type);
             writer.WriteLine();
@@ -137,6 +145,7 @@ public static partial class BindingsGenerator
 
             foreach (var @event in type.DeclaredEvents)
             {
+                writer.WriteDocumentation(@event);
                 writer.WriteAttributes(@event);
                 writer.WriteEventDeclaration(@event);
 
@@ -169,6 +178,7 @@ public static partial class BindingsGenerator
 
             foreach (var field in type.DeclaredFields)
             {
+                writer.WriteDocumentation(field);
                 writer.WriteAttributes(field);
                 writer.WriteFieldDeclaration(field);
                 writer.WriteLine(';');
@@ -181,6 +191,7 @@ public static partial class BindingsGenerator
                     throw new InvalidOperationException($"Property '{type.Name}.{property.Name}' must have at least a getter or a setter.");
                 }
 
+                writer.WriteDocumentation(property);
                 writer.WriteAttributes(property);
                 writer.WritePropertyDeclaration(property);
                 writer.WriteLine();
@@ -219,6 +230,7 @@ public static partial class BindingsGenerator
 
             foreach (var constructor in type.DeclaredConstructors)
             {
+                writer.WriteDocumentation(constructor);
                 writer.WriteAttributes(constructor);
                 writer.WriteConstructorSignature(constructor, type);
                 writer.WriteLine();
@@ -231,6 +243,7 @@ public static partial class BindingsGenerator
             {
                 Debug.Assert(!method.IsConstructor);
 
+                writer.WriteDocumentation(method);
                 writer.WriteAttributes(method);
                 if (method.ReturnParameter is not null)
                 {

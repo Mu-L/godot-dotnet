@@ -30,6 +30,9 @@ internal sealed class BuiltInClassesBindingsDataCollector : BindingsDataCollecto
                 VisibilityAttributes = VisibilityAttributes.Assembly,
                 TypeAttributes = TypeAttributes.ByRefLikeType,
                 IsPartial = true,
+                Documentation = context.Options.IncludeDocumentation
+                    ? engineClass.Description ?? engineClass.BriefDescription
+                    : null,
             };
 
             if (ShouldGenerateBuiltInClassHelpers(engineClass.Name))
@@ -90,6 +93,7 @@ internal sealed class BuiltInClassesBindingsDataCollector : BindingsDataCollecto
                     IsStatic = true,
                     ReturnParameter = ReturnInfo.FromType(type),
                     Body = new CallBuiltInConstructor(variantTypeName, engineConstructor.Index, context.TypeDB),
+                    Documentation = context.Options.IncludeDocumentation ? engineConstructor.Description : null,
                 };
 
                 foreach (var arg in engineConstructor.Arguments)
@@ -347,6 +351,7 @@ internal sealed class BuiltInClassesBindingsDataCollector : BindingsDataCollecto
                 {
                     VisibilityAttributes = VisibilityAttributes.Assembly,
                     IsStatic = true,
+                    Documentation = context.Options.IncludeDocumentation ? engineMethod.Description : null,
                 };
 
                 // Hardcode renames to avoid conflicts with manually defined members.
@@ -448,6 +453,7 @@ internal sealed class BuiltInClassesBindingsDataCollector : BindingsDataCollecto
                 {
                     VisibilityAttributes = VisibilityAttributes.Assembly,
                     IsStatic = true,
+                    Documentation = context.Options.IncludeDocumentation ? engineOperator.Description : null,
                 };
 
                 var valueParameter = new ParameterInfo("value", type)
@@ -506,13 +512,13 @@ internal sealed class BuiltInClassesBindingsDataCollector : BindingsDataCollecto
             // Color constants.
             if (engineClass.Name == "Color")
             {
-                var colorsType = new TypeInfo("NamedColors", context.Options.Namespace)
+                var namedColorsType = new TypeInfo("NamedColors", context.Options.Namespace)
                 {
                     VisibilityAttributes = VisibilityAttributes.Public,
                     TypeAttributes = TypeAttributes.ReferenceType,
                     IsStatic = true,
                 };
-                context.AddGeneratedType($"BuiltInClasses/{colorsType.Name}.cs", colorsType);
+                context.AddGeneratedType($"BuiltInClasses/{namedColorsType.Name}.cs", namedColorsType);
 
                 var dictionary = new FieldInfo("ByName", KnownTypes.SystemFrozenDictionaryOf(KnownTypes.SystemString, KnownTypes.GodotColor))
                 {
@@ -520,7 +526,7 @@ internal sealed class BuiltInClassesBindingsDataCollector : BindingsDataCollecto
                     IsStatic = true,
                     IsInitOnly = true,
                 };
-                colorsType.DeclaredFields.Add(dictionary);
+                namedColorsType.DeclaredFields.Add(dictionary);
 
                 var dictionaryType = KnownTypes.SystemDictionaryOf(KnownTypes.SystemString, KnownTypes.GodotColor);
 
@@ -549,12 +555,16 @@ internal sealed class BuiltInClassesBindingsDataCollector : BindingsDataCollecto
                             }),
                         },
                     };
-                    colorsType.DeclaredProperties.Add(constant);
+                    namedColorsType.DeclaredProperties.Add(constant);
 
                     string key = engineConstant.Name.Replace("_", "");
 
                     dictionaryInitializer.Append("        ");
                     dictionaryInitializer.AppendLine(CultureInfo.InvariantCulture, $$"""{ "{{key}}", {{constantName}} },""");
+
+                    // IMPORTANT: The engine declares these constants in the Color type, so we need
+                    // to register the mapping on the Color type so the lookup can find them later.
+                    context.TypeDB.RegisterMemberMapping(KnownTypes.GodotColor, engineConstant.Name, $"{namedColorsType.FullNameWithGlobal}.{constantName}");
                 }
 
                 dictionaryInitializer.Append("    }, global::System.StringComparer.OrdinalIgnoreCase)");

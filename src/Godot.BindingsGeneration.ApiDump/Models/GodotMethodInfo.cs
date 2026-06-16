@@ -72,6 +72,15 @@ public sealed class GodotMethodInfo
     [JsonPropertyName("arguments")]
     public GodotArgumentInfo[] Arguments { get; set; } = [];
 
+    /// <summary>
+    /// Documentation for this method.
+    /// </summary>
+    /// <remarks>
+    /// This is an optional field only present when <see cref="GodotApi"/> was generated with documentation included.
+    /// </remarks>
+    [JsonPropertyName("description")]
+    public string? Description { get; set; }
+
     /// <inheritdoc/>
     public override string ToString() =>
         $"{ReturnValue?.Type ?? "void"} {Name}({string.Join(", ", (object[])Arguments)})";

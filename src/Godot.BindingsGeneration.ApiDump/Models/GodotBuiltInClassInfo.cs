@@ -68,6 +68,24 @@ public sealed class GodotBuiltInClassInfo
     [JsonPropertyName("has_destructor")]
     public bool HasDestructor { get; set; }
 
+    /// <summary>
+    /// Short documentation for this class.
+    /// </summary>
+    /// <remarks>
+    /// This is an optional field only present when <see cref="GodotApi"/> was generated with documentation included.
+    /// </remarks>
+    [JsonPropertyName("brief_description")]
+    public string? BriefDescription { get; set; }
+
+    /// <summary>
+    /// Documentation for this class.
+    /// </summary>
+    /// <remarks>
+    /// This is an optional field only present when <see cref="GodotApi"/> was generated with documentation included.
+    /// </remarks>
+    [JsonPropertyName("description")]
+    public string? Description { get; set; }
+
     /// <inheritdoc/>
     public override string ToString() => $"class {Name}";
 }

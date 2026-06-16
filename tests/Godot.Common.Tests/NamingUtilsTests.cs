@@ -1,3 +1,5 @@
+using System;
+using System.Collections.Generic;
 using Godot.BindingsGeneration.ApiDump;
 using Godot.BindingsGeneration.Reflection;
 
@@ -118,22 +120,18 @@ public class NamingUtilsTests
                     new() { Name = "UNIFORM_TYPE_MAX", Value = 10 },
                 ],
             },
-            new EnumInfo("UniformType")
-            {
-                Values =
-                [
-                    ("Sampler", 0),
-                    ("SamplerWithTexture", 1),
-                    ("Texture", 2),
-                    ("Image", 3),
-                    ("TextureBuffer", 4),
-                    ("SamplerWithTextureBuffer", 5),
-                    ("ImageBuffer", 6),
-                    ("UniformBuffer", 7),
-                    ("StorageBuffer", 8),
-                    ("InputAttachment", 9),
-                ],
-            }
+            CreateEnumInfo("UniformType", [
+                ("Sampler", 0),
+                ("SamplerWithTexture", 1),
+                ("Texture", 2),
+                ("Image", 3),
+                ("TextureBuffer", 4),
+                ("SamplerWithTextureBuffer", 5),
+                ("ImageBuffer", 6),
+                ("UniformBuffer", 7),
+                ("StorageBuffer", 8),
+                ("InputAttachment", 9),
+            ])
         },
         {
             new GodotEnumInfo()
@@ -150,18 +148,14 @@ public class NamingUtilsTests
                     new() { Name = "PARTICLES_COLLISION_HEIGHTFIELD_RESOLUTION_MAX", Value = 6 },
                 ],
             },
-            new EnumInfo("ParticlesCollisionHeightfieldResolution")
-            {
-                Values =
-                [
-                    ("Resolution256", 0),
-                    ("Resolution512", 1),
-                    ("Resolution1024", 2),
-                    ("Resolution2048", 3),
-                    ("Resolution4096", 4),
-                    ("Resolution8192", 5),
-                ],
-            }
+            CreateEnumInfo("ParticlesCollisionHeightfieldResolution", [
+                ("Resolution256", 0),
+                ("Resolution512", 1),
+                ("Resolution1024", 2),
+                ("Resolution2048", 3),
+                ("Resolution4096", 4),
+                ("Resolution8192", 5),
+            ])
         },
         {
             new GodotEnumInfo()
@@ -182,22 +176,18 @@ public class NamingUtilsTests
                     new() { Name = "SHADER_STAGE_COMPUTE_BIT", Value = 16 },
                 ],
             },
-            new EnumInfo("ShaderStage")
-            {
-                Values =
-                [
-                    ("Vertex", 0),
-                    ("Fragment", 1),
-                    ("TesselationControl", 2),
-                    ("TesselationEvaluation", 3),
-                    ("Compute", 4),
-                    ("VertexBit", 1),
-                    ("FragmentBit", 2),
-                    ("TesselationControlBit", 4),
-                    ("TesselationEvaluationBit", 8),
-                    ("ComputeBit", 16),
-                ],
-            }
+            CreateEnumInfo("ShaderStage", [
+                ("Vertex", 0),
+                ("Fragment", 1),
+                ("TesselationControl", 2),
+                ("TesselationEvaluation", 3),
+                ("Compute", 4),
+                ("VertexBit", 1),
+                ("FragmentBit", 2),
+                ("TesselationControlBit", 4),
+                ("TesselationEvaluationBit", 8),
+                ("ComputeBit", 16),
+            ])
         },
         {
             new GodotEnumInfo()
@@ -208,13 +198,9 @@ public class NamingUtilsTests
                     new() { Name = "STORAGE_BUFFER_USAGE_DISPATCH_INDIRECT", Value = 1 },
                 ],
             },
-            new EnumInfo("StorageBufferUsage")
-            {
-                Values =
-                [
-                    ("DispatchIndirect", 1),
-                ],
-            }
+            CreateEnumInfo("StorageBufferUsage", [
+                ("DispatchIndirect", 1),
+            ])
         },
         {
             new GodotEnumInfo()
@@ -232,20 +218,16 @@ public class NamingUtilsTests
                     new() { Name = "FLAG_REPLACE_SUBRESOURCE_PATHS", Value = 64 },
                 ],
             },
-            new EnumInfo("SaverFlags")
-            {
-                Values =
-                [
-                    ("None", 0),
-                    ("RelativePaths", 1),
-                    ("BundleResources", 2),
-                    ("ChangePath", 4),
-                    ("OmitEditorProperties", 8),
-                    ("SaveBigEndian", 16),
-                    ("Compress", 32),
-                    ("ReplaceSubresourcePaths", 64),
-                ],
-            }
+            CreateEnumInfo("SaverFlags", [
+                ("None", 0),
+                ("RelativePaths", 1),
+                ("BundleResources", 2),
+                ("ChangePath", 4),
+                ("OmitEditorProperties", 8),
+                ("SaveBigEndian", 16),
+                ("Compress", 32),
+                ("ReplaceSubresourcePaths", 64),
+            ])
         },
         {
             new GodotEnumInfo()
@@ -263,20 +245,16 @@ public class NamingUtilsTests
                     new() { Name = "METHOD_FLAGS_DEFAULT", Value = 1 },
                 ],
             },
-            new EnumInfo("MethodFlags")
-            {
-                Values =
-                [
-                    ("Normal", 1),
-                    ("Editor", 2),
-                    ("Const", 4),
-                    ("Virtual", 8),
-                    ("Vararg", 16),
-                    ("Static", 32),
-                    ("ObjectCore", 64),
-                    ("Default", 1),
-                ],
-            }
+            CreateEnumInfo("MethodFlags", [
+                ("Normal", 1),
+                ("Editor", 2),
+                ("Const", 4),
+                ("Virtual", 8),
+                ("Vararg", 16),
+                ("Static", 32),
+                ("ObjectCore", 64),
+                ("Default", 1),
+            ])
         },
         {
             new GodotEnumInfo()
@@ -325,50 +303,46 @@ public class NamingUtilsTests
                     new() { Name = "TYPE_MAX", Value = 38 },
                 ],
             },
-            new EnumInfo("VariantType")
-            {
-                Values =
-                [
-                    ("Nil", 0),
-                    ("Bool", 1),
-                    ("Int", 2),
-                    ("Float", 3),
-                    ("String", 4),
-                    ("Vector2", 5),
-                    ("Vector2I", 6),
-                    ("Rect2", 7),
-                    ("Rect2I", 8),
-                    ("Vector3", 9),
-                    ("Vector3I", 10),
-                    ("Transform2D", 11),
-                    ("Vector4", 12),
-                    ("Vector4I", 13),
-                    ("Plane", 14),
-                    ("Quaternion", 15),
-                    ("Aabb", 16),
-                    ("Basis", 17),
-                    ("Transform3D", 18),
-                    ("Projection", 19),
-                    ("Color", 20),
-                    ("StringName", 21),
-                    ("NodePath", 22),
-                    ("Rid", 23),
-                    ("Object", 24),
-                    ("Callable", 25),
-                    ("Signal", 26),
-                    ("Dictionary", 27),
-                    ("Array", 28),
-                    ("PackedByteArray", 29),
-                    ("PackedInt32Array", 30),
-                    ("PackedInt64Array", 31),
-                    ("PackedFloat32Array", 32),
-                    ("PackedFloat64Array", 33),
-                    ("PackedStringArray", 34),
-                    ("PackedVector2Array", 35),
-                    ("PackedVector3Array", 36),
-                    ("PackedColorArray", 37),
-                ],
-            }
+            CreateEnumInfo("VariantType", [
+                ("Nil", 0),
+                ("Bool", 1),
+                ("Int", 2),
+                ("Float", 3),
+                ("String", 4),
+                ("Vector2", 5),
+                ("Vector2I", 6),
+                ("Rect2", 7),
+                ("Rect2I", 8),
+                ("Vector3", 9),
+                ("Vector3I", 10),
+                ("Transform2D", 11),
+                ("Vector4", 12),
+                ("Vector4I", 13),
+                ("Plane", 14),
+                ("Quaternion", 15),
+                ("Aabb", 16),
+                ("Basis", 17),
+                ("Transform3D", 18),
+                ("Projection", 19),
+                ("Color", 20),
+                ("StringName", 21),
+                ("NodePath", 22),
+                ("Rid", 23),
+                ("Object", 24),
+                ("Callable", 25),
+                ("Signal", 26),
+                ("Dictionary", 27),
+                ("Array", 28),
+                ("PackedByteArray", 29),
+                ("PackedInt32Array", 30),
+                ("PackedInt64Array", 31),
+                ("PackedFloat32Array", 32),
+                ("PackedFloat64Array", 33),
+                ("PackedStringArray", 34),
+                ("PackedVector2Array", 35),
+                ("PackedVector3Array", 36),
+                ("PackedColorArray", 37),
+            ])
         },
         {
             new GodotEnumInfo()
@@ -427,61 +401,113 @@ public class NamingUtilsTests
                     new() { Name = "ERR_PRINTER_ON_FIRE", Value = 48 },
                 ],
             },
-            new EnumInfo("Error")
+            CreateEnumInfo("Error", [
+                ("Ok", 0),
+                ("Failed", 1),
+                ("Unavailable", 2),
+                ("Unconfigured", 3),
+                ("Unauthorized", 4),
+                ("ParameterRangeError", 5),
+                ("OutOfMemory", 6),
+                ("FileNotFound", 7),
+                ("FileBadDrive", 8),
+                ("FileBadPath", 9),
+                ("FileNoPermission", 10),
+                ("FileAlreadyInUse", 11),
+                ("FileCantOpen", 12),
+                ("FileCantWrite", 13),
+                ("FileCantRead", 14),
+                ("FileUnrecognized", 15),
+                ("FileCorrupt", 16),
+                ("FileMissingDependencies", 17),
+                ("FileEof", 18),
+                ("CantOpen", 19),
+                ("CantCreate", 20),
+                ("QueryFailed", 21),
+                ("AlreadyInUse", 22),
+                ("Locked", 23),
+                ("Timeout", 24),
+                ("CantConnect", 25),
+                ("CantResolve", 26),
+                ("ConnectionError", 27),
+                ("CantAcquireResource", 28),
+                ("CantFork", 29),
+                ("InvalidData", 30),
+                ("InvalidParameter", 31),
+                ("AlreadyExists", 32),
+                ("DoesNotExist", 33),
+                ("DatabaseCantRead", 34),
+                ("DatabaseCantWrite", 35),
+                ("CompilationFailed", 36),
+                ("MethodNotFound", 37),
+                ("LinkFailed", 38),
+                ("ScriptFailed", 39),
+                ("CyclicLink", 40),
+                ("InvalidDeclaration", 41),
+                ("DuplicateSymbol", 42),
+                ("ParseError", 43),
+                ("Busy", 44),
+                ("Skip", 45),
+                ("Help", 46),
+                ("Bug", 47),
+                ("PrinterOnFire", 48),
+            ])
+        },
+        {
+            new GodotEnumInfo()
             {
+                Name = "JoyAxis",
                 Values =
                 [
-                    ("Ok", 0),
-                    ("Failed", 1),
-                    ("Unavailable", 2),
-                    ("Unconfigured", 3),
-                    ("Unauthorized", 4),
-                    ("ParameterRangeError", 5),
-                    ("OutOfMemory", 6),
-                    ("FileNotFound", 7),
-                    ("FileBadDrive", 8),
-                    ("FileBadPath", 9),
-                    ("FileNoPermission", 10),
-                    ("FileAlreadyInUse", 11),
-                    ("FileCantOpen", 12),
-                    ("FileCantWrite", 13),
-                    ("FileCantRead", 14),
-                    ("FileUnrecognized", 15),
-                    ("FileCorrupt", 16),
-                    ("FileMissingDependencies", 17),
-                    ("FileEof", 18),
-                    ("CantOpen", 19),
-                    ("CantCreate", 20),
-                    ("QueryFailed", 21),
-                    ("AlreadyInUse", 22),
-                    ("Locked", 23),
-                    ("Timeout", 24),
-                    ("CantConnect", 25),
-                    ("CantResolve", 26),
-                    ("ConnectionError", 27),
-                    ("CantAcquireResource", 28),
-                    ("CantFork", 29),
-                    ("InvalidData", 30),
-                    ("InvalidParameter", 31),
-                    ("AlreadyExists", 32),
-                    ("DoesNotExist", 33),
-                    ("DatabaseCantRead", 34),
-                    ("DatabaseCantWrite", 35),
-                    ("CompilationFailed", 36),
-                    ("MethodNotFound", 37),
-                    ("LinkFailed", 38),
-                    ("ScriptFailed", 39),
-                    ("CyclicLink", 40),
-                    ("InvalidDeclaration", 41),
-                    ("DuplicateSymbol", 42),
-                    ("ParseError", 43),
-                    ("Busy", 44),
-                    ("Skip", 45),
-                    ("Help", 46),
-                    ("Bug", 47),
-                    ("PrinterOnFire", 48),
+                    new() { Name = "JOY_AXIS_INVALID", Value =  -1 },
+                    new() { Name = "JOY_AXIS_LEFT_X", Value = 0 },
+                    new() { Name = "JOY_AXIS_LEFT_Y", Value = 1 },
+                    new() { Name = "JOY_AXIS_RIGHT_X", Value = 2 },
+                    new() { Name = "JOY_AXIS_RIGHT_Y", Value = 3 },
+                    new() { Name = "JOY_AXIS_TRIGGER_LEFT", Value = 4 },
+                    new() { Name = "JOY_AXIS_TRIGGER_RIGHT", Value = 5 },
+                    new() { Name = "JOY_AXIS_SDL_MAX", Value = 6 },
+                    new() { Name = "JOY_AXIS_MAX", Value = 10 },
                 ],
-            }
+            },
+            CreateEnumInfo("JoyAxis", [
+                ("Invalid", -1),
+                ("LeftX", 0),
+                ("LeftY", 1),
+                ("RightX", 2),
+                ("RightY", 3),
+                ("TriggerLeft", 4),
+                ("TriggerRight", 5),
+            ])
+        },
+        {
+            // JoxAxis enum in reverse order to test max constants are removed properly
+            // even if they are not at the end of the enum.
+            new GodotEnumInfo()
+            {
+                Name = "JoyAxis",
+                Values =
+                [
+                    new() { Name = "JOY_AXIS_MAX", Value = 10 },
+                    new() { Name = "JOY_AXIS_SDL_MAX", Value = 6 },
+                    new() { Name = "JOY_AXIS_TRIGGER_RIGHT", Value = 5 },
+                    new() { Name = "JOY_AXIS_TRIGGER_LEFT", Value = 4 },
+                    new() { Name = "JOY_AXIS_RIGHT_Y", Value = 3 },
+                    new() { Name = "JOY_AXIS_RIGHT_X", Value = 2 },
+                    new() { Name = "JOY_AXIS_LEFT_Y", Value = 1 },
+                    new() { Name = "JOY_AXIS_LEFT_X", Value = 0 },
+                    new() { Name = "JOY_AXIS_INVALID", Value =  -1 },
+                ],
+            },
+            CreateEnumInfo("JoyAxis", [
+                ("TriggerRight", 5),
+                ("TriggerLeft", 4),
+                ("RightY", 3),
+                ("RightX", 2),
+                ("LeftY", 1),
+                ("LeftX", 0),
+                ("Invalid", -1),
+            ])
         },
     };
 
@@ -492,9 +518,16 @@ public class NamingUtilsTests
         string enumName = NamingUtils.PascalToPascalCase(engineEnum.Name);
         var actual = new EnumInfo(enumName);
 
+        List<FieldInfo> enumConstantsByIndex = [];
         foreach (var (name, value) in engineEnum.Values)
         {
-            actual.Values.Add((NamingUtils.SnakeToPascalCase(name), value));
+            var constant = new FieldInfo(NamingUtils.SnakeToPascalCase(name), null!)
+            {
+                IsLiteral = true,
+                DefaultValue = $"{value}",
+            };
+            actual.DeclaredFields.Add(constant);
+            enumConstantsByIndex.Add(constant);
         }
 
         int enumPrefix = NamingUtils.DetermineEnumPrefix(engineEnum);
@@ -506,9 +539,41 @@ public class NamingUtilsTests
         }
 
         NamingUtils.ApplyPrefixToEnumConstants(engineEnum, actual, enumPrefix);
-        NamingUtils.RemoveMaxConstant(engineEnum, actual);
+        NamingUtils.RemoveMaxConstant(engineEnum, actual, enumConstantsByIndex);
+
+        // HARDCODED: Some enums have more constants that should be removed.
+        if (engineEnum.Name is "JoyButton" or "JoyAxis")
+        {
+            NamingUtils.RemoveConstant(engineEnum, actual, enumConstantsByIndex,
+                engineConstant => engineConstant.Name.EndsWith("_SDL_MAX", StringComparison.Ordinal));
+        }
 
         Assert.Equal(expected.Name, actual.Name);
-        Assert.Equal(expected.Values, actual.Values);
+        Assert.Equal(GetEnumValues(expected), GetEnumValues(actual));
+    }
+
+    static EnumInfo CreateEnumInfo(string name, params (string Name, int Value)[] values)
+    {
+        var enumInfo = new EnumInfo(name);
+        foreach (var (valueName, value) in values)
+        {
+            enumInfo.DeclaredFields.Add(new FieldInfo(valueName, null!)
+            {
+                IsLiteral = true,
+                DefaultValue = $"{value}",
+            });
+        }
+        return enumInfo;
+    }
+
+    static (string Name, string? Value)[] GetEnumValues(EnumInfo enumInfo)
+    {
+        var values = new (string Name, string? Value)[enumInfo.DeclaredFields.Count];
+        for (int i = 0; i < enumInfo.DeclaredFields.Count; i++)
+        {
+            var field = enumInfo.DeclaredFields[i];
+            values[i] = (field.Name, field.DefaultValue);
+        }
+        return values;
     }
 }

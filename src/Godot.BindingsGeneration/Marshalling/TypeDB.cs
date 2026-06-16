@@ -40,6 +40,33 @@ internal sealed class TypeDB
     private readonly Dictionary<TypeInfo, DefaultValueParser> _defaultValueParsers = [];
 
     /// <summary>
+    /// Mapping between the engine member name and the managed member name for each type.
+    /// The key of the outer dictionary is the managed type, the key of the inner dictionary
+    /// is the engine member name, and the value is the fully qualified managed member name.
+    /// </summary>
+    private readonly Dictionary<TypeInfo, Dictionary<string, string>> _memberMappingByType = [];
+
+    /// <summary>
+    /// Mapping between the engine member name and the managed member name for each type.
+    /// The key of the outer dictionary is the managed type, the key of the inner dictionary
+    /// is the engine member name, and the value is a function that returns the fully qualified managed member name.
+    /// </summary>
+    /// <remarks>
+    /// This is used when registering the mapping early, before the member is fully generated.
+    /// In this case, the member or its containing type may still be renamed, so we don't know
+    /// the fully qualified name yet.
+    /// </remarks>
+    private readonly Dictionary<TypeInfo, Dictionary<string, Func<string>>> _lazyMemberMappingByType = [];
+
+    /// <summary>
+    /// Mapping between the engine member name and the managed member name for types that
+    /// don't exist in TypeDB, like global functions or constants.
+    /// The key is the fully qualified engine member name, and the value is the fully qualified
+    /// managed member name.
+    /// </summary>
+    private readonly Dictionary<string, string> _globalMemberMapping = [];
+
+    /// <summary>
     /// Register the type that will be used for the given engine name.
     /// </summary>
     /// <param name="engineTypeName">The name of the type in the Godot engine.</param>
@@ -139,7 +166,123 @@ internal sealed class TypeDB
         _defaultValueParsers[type] = defaultValueParser;
     }
 
-    public TypeInfo GetTypeFromEngineName(string engineTypeName)
+    /// <summary>
+    /// Registers a mapping between the engine member name and the managed member name for a given type.
+    /// </summary>
+    /// <remarks>
+    /// The <paramref name="type"/> must be registered in <see cref="TypeDB"/> as the managed type
+    /// that represents the engine type that contains the member, so it can be found when looking up
+    /// the member mapping. If the type may be different, use <see cref="RegisterGlobalMemberMapping"/>
+    /// instead.
+    /// </remarks>
+    /// <param name="type">The type that contains the member.</param>
+    /// <param name="engineMemberName">The name of the member in the engine.</param>
+    /// <param name="member">The managed member info.</param>
+    /// <exception cref="ArgumentException">Member mapping already registered.</exception>
+    public void RegisterMemberMapping(TypeInfo type, string engineMemberName, MemberInfo member)
+    {
+        Func<string> lazyFullyQualifiedMemberName = () => $"{type.FullNameWithGlobal}.{member.Name}";
+        RegisterLazyMemberMapping(type, engineMemberName, lazyFullyQualifiedMemberName);
+
+        if (type.IsEnum && type.ContainingType is not null)
+        {
+            // Enum members are also registered in the containing type, because the engine
+            // allows accessing them directly as if they were constants in the containing type.
+            RegisterLazyMemberMapping(type.ContainingType, engineMemberName, lazyFullyQualifiedMemberName);
+        }
+    }
+
+    private void RegisterLazyMemberMapping(TypeInfo type, string engineMemberName, Func<string> lazyFullyQualifiedMemberName)
+    {
+        if (!_lazyMemberMappingByType.TryGetValue(type, out var memberMapping))
+        {
+            _lazyMemberMappingByType[type] = memberMapping = [];
+        }
+
+        // There should be no overlapping names even if the member kind is different,
+        // the engine doesn't allow it and there's no method overload support either.
+        if (memberMapping.ContainsKey(engineMemberName))
+        {
+            throw new ArgumentException($"Member mapping for member '{engineMemberName}' on type '{type.FullName}' already registered.", nameof(engineMemberName));
+        }
+
+        memberMapping[engineMemberName] = lazyFullyQualifiedMemberName;
+    }
+
+    /// <summary>
+    /// Registers a mapping between the engine member name and the managed member name for a given type.
+    /// </summary>
+    /// <remarks>
+    /// The <paramref name="type"/> must be registered in <see cref="TypeDB"/> as the managed type
+    /// that represents the engine type that contains the member, so it can be found when looking up
+    /// the member mapping. If the type may be different, use <see cref="RegisterGlobalMemberMapping"/>
+    /// instead.
+    /// </remarks>
+    /// <param name="type">The type that contains the member.</param>
+    /// <param name="engineMemberName">The name of the member in the engine.</param>
+    /// <param name="fullyQualifiedMemberName">
+    /// The fully qualified name of the managed member. This allows specifying a completely different
+    /// type than <paramref name="type"/> for the member, which is useful for extension methods or
+    /// methods that are implemented in a different type than the one that contains the member in the engine.
+    /// </param>
+    /// <exception cref="ArgumentException">Member mapping already registered.</exception>
+    public void RegisterMemberMapping(TypeInfo type, string engineMemberName, string fullyQualifiedMemberName)
+    {
+        if (!_memberMappingByType.TryGetValue(type, out var memberMapping))
+        {
+            _memberMappingByType[type] = memberMapping = [];
+        }
+
+        // There should be no overlapping names even if the member kind is different,
+        // the engine doesn't allow it and there's no method overload support either.
+        if (memberMapping.ContainsKey(engineMemberName))
+        {
+            throw new ArgumentException($"Member mapping for member '{engineMemberName}' on type '{type.FullName}' already registered.", nameof(engineMemberName));
+        }
+
+        memberMapping[engineMemberName] = fullyQualifiedMemberName;
+    }
+
+    /// <summary>
+    /// Registers a mapping between the engine member name and the managed member name for types that
+    /// are not tied to a specific type, such as global functions or operators.
+    /// </summary>
+    /// <remarks>
+    /// Unlike <see cref="RegisterMemberMapping(TypeInfo, string, string)"/>, this method allows specifying
+    /// any type for the member, so it can be used for members that are not tied to a specific type or types
+    /// that aren't registered in <see cref="TypeDB"/>. It can also be used to implement hardcoded special
+    /// cases that will take precedence over looking up the member mapping for a specific type.
+    /// Prefer <see cref="RegisterMemberMapping(TypeInfo, string, string)"/> when the type is known and registered
+    /// in <see cref="TypeDB"/>, so it can participate in hierarchy lookups.
+    /// </remarks>
+    /// <param name="fullyQualifiedEngineMemberName">The fully qualified name of the engine member.</param>
+    /// <param name="fullyQualifiedMemberName">The fully qualified name of the managed member.</param>
+    /// <exception cref="ArgumentException">Member mapping already registered.</exception>
+    public void RegisterGlobalMemberMapping(string fullyQualifiedEngineMemberName, string fullyQualifiedMemberName)
+    {
+        // There should be no overlapping names even if the member kind is different,
+        // the engine doesn't allow it and there's no method overload support either.
+        if (_globalMemberMapping.ContainsKey(fullyQualifiedEngineMemberName))
+        {
+            throw new ArgumentException($"Member mapping for member '{fullyQualifiedEngineMemberName}' already registered.", nameof(fullyQualifiedEngineMemberName));
+        }
+
+        _globalMemberMapping[fullyQualifiedEngineMemberName] = fullyQualifiedMemberName;
+
+        // HARDCODED: Global APIs are registered in a "@GlobalScope" class in the engine, but the documentation
+        // sometimes omits the "@GlobalScope" prefix when referencing the member name. We register the mapping
+        // without the prefix as well, so it can be found when looking up the member mapping without the prefix.
+        if (fullyQualifiedEngineMemberName.StartsWith("@GlobalScope.", StringComparison.Ordinal))
+        {
+            string engineMemberNameWithoutGlobalScope = fullyQualifiedEngineMemberName.Substring("@GlobalScope.".Length);
+            if (!_globalMemberMapping.ContainsKey(engineMemberNameWithoutGlobalScope))
+            {
+                _globalMemberMapping[engineMemberNameWithoutGlobalScope] = fullyQualifiedMemberName;
+            }
+        }
+    }
+
+    public TypeInfo GetTypeFromEngineName(ReadOnlySpan<char> engineTypeName)
     {
         if (!TryGetTypeFromEngineName(engineTypeName, out var type))
         {
@@ -149,7 +292,7 @@ internal sealed class TypeDB
         return type;
     }
 
-    public TypeInfo GetTypeFromEngineName(string engineTypeName, string? engineTypeMeta)
+    public TypeInfo GetTypeFromEngineName(ReadOnlySpan<char> engineTypeName, string? engineTypeMeta)
     {
         if (!TryGetTypeFromEngineName(engineTypeName, engineTypeMeta, out var type))
         {
@@ -159,19 +302,20 @@ internal sealed class TypeDB
         return type;
     }
 
-    public bool TryGetTypeFromEngineName(string engineTypeName, [NotNullWhen(true)] out TypeInfo? type)
+    public bool TryGetTypeFromEngineName(ReadOnlySpan<char> engineTypeName, [NotNullWhen(true)] out TypeInfo? type)
     {
         return TryGetTypeFromEngineName(engineTypeName, null, out type);
     }
 
-    public bool TryGetTypeFromEngineName(string engineTypeName, string? engineTypeMeta, [NotNullWhen(true)] out TypeInfo? type)
+    public bool TryGetTypeFromEngineName(ReadOnlySpan<char> engineTypeName, string? engineTypeMeta, [NotNullWhen(true)] out TypeInfo? type)
     {
         if (engineTypeMeta is not null && _typeByEngineMetaName.TryGetValue($"{engineTypeName}:{engineTypeMeta}", out type))
         {
             return true;
         }
 
-        if (_typeByEngineName.TryGetValue(engineTypeName, out type))
+        var typeByEngineNameLookup = _typeByEngineName.GetAlternateLookup<ReadOnlySpan<char>>();
+        if (typeByEngineNameLookup.TryGetValue(engineTypeName, out type))
         {
             return true;
         }
@@ -181,18 +325,18 @@ internal sealed class TypeDB
         const string EnumTypePrefix = "enum::";
         if (engineTypeName.StartsWith(EnumTypePrefix, StringComparison.Ordinal))
         {
-            return TryGetTypeFromEngineName(engineTypeName.Substring(EnumTypePrefix.Length), out type);
+            return TryGetTypeFromEngineName(engineTypeName.Slice(EnumTypePrefix.Length), out type);
         }
         const string BitfieldTypePrefix = "bitfield::";
         if (engineTypeName.StartsWith(BitfieldTypePrefix, StringComparison.Ordinal))
         {
-            return TryGetTypeFromEngineName(engineTypeName.Substring(BitfieldTypePrefix.Length), out type);
+            return TryGetTypeFromEngineName(engineTypeName.Slice(BitfieldTypePrefix.Length), out type);
         }
 
         const string TypedArrayTypePrefix = "typedarray::";
         if (engineTypeName.StartsWith(TypedArrayTypePrefix, StringComparison.Ordinal))
         {
-            if (!TryGetTypeFromEngineName(engineTypeName.Substring(TypedArrayTypePrefix.Length), out var elementType))
+            if (!TryGetTypeFromEngineName(engineTypeName.Slice(TypedArrayTypePrefix.Length), out var elementType))
             {
                 // The element type could not be found, fallback to a non-generic Array.
                 Console.Error.WriteLine($"Element type for array type '{engineTypeName}' not found, falling back to non-generic Array.");
@@ -202,7 +346,7 @@ internal sealed class TypeDB
 
             // Register type and marshalling information.
             type = KnownTypes.GodotArrayOf(elementType);
-            RegisterTypeName(engineTypeName, type);
+            RegisterTypeName(engineTypeName.ToString(), type);
             RegisterUnmanagedType(type, KnownTypes.NativeGodotArray);
             return true;
         }
@@ -536,6 +680,76 @@ internal sealed class TypeDB
         }
 
         defaultValueExpression = null;
+        return false;
+    }
+
+    public bool TryGetGlobalMemberMapping(ReadOnlySpan<char> fullyQualifiedEngineMemberName, [NotNullWhen(true)] out string? fullyQualifiedMemberName)
+    {
+        var lookup = _globalMemberMapping.GetAlternateLookup<ReadOnlySpan<char>>();
+
+        if (lookup.TryGetValue(fullyQualifiedEngineMemberName, out fullyQualifiedMemberName))
+        {
+            return true;
+        }
+
+        // HARDCODED: Global APIs are registered in a "@GlobalScope" class in the engine, so the documentation
+        // sometimes uses the "@GlobalScope" prefix when fully-qualifying the member name. We may still be able
+        // to find the member if we remove the prefix.
+        if (fullyQualifiedEngineMemberName.StartsWith("@GlobalScope.", StringComparison.Ordinal))
+        {
+            fullyQualifiedEngineMemberName = fullyQualifiedEngineMemberName.Slice("@GlobalScope.".Length);
+            if (lookup.TryGetValue(fullyQualifiedEngineMemberName, out fullyQualifiedMemberName))
+            {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    public bool TryGetMemberMapping(TypeInfo type, ReadOnlySpan<char> engineMemberName, [NotNullWhen(true)] out string? fullyQualifiedMemberName)
+    {
+        // Try to find the mapping in the global member mapping first, because it will be faster
+        // than iterating the type hierarchy and it allows hardcoding for special cases.
+        if (TryGetGlobalMemberMapping(engineMemberName, out fullyQualifiedMemberName))
+        {
+            return true;
+        }
+
+        return TryGetMemberMappingCore(type, engineMemberName, out fullyQualifiedMemberName);
+    }
+
+    private bool TryGetMemberMappingCore(TypeInfo type, ReadOnlySpan<char> engineMemberName, [NotNullWhen(true)] out string? fullyQualifiedMemberName)
+    {
+        if (_memberMappingByType.TryGetValue(type, out var memberMapping))
+        {
+            var lookup = memberMapping.GetAlternateLookup<ReadOnlySpan<char>>();
+            if (lookup.TryGetValue(engineMemberName, out fullyQualifiedMemberName))
+            {
+                return true;
+            }
+        }
+
+        if (_lazyMemberMappingByType.TryGetValue(type, out var lazyMemberMapping))
+        {
+            var lookup = lazyMemberMapping.GetAlternateLookup<ReadOnlySpan<char>>();
+            if (lookup.TryGetValue(engineMemberName, out var lazyFullyQualifiedMemberName))
+            {
+                fullyQualifiedMemberName = lazyFullyQualifiedMemberName();
+
+                // If we found it, register it in the regular mapping so we don't have to call the lazy function again.
+                RegisterMemberMapping(type, engineMemberName.ToString(), fullyQualifiedMemberName);
+
+                return true;
+            }
+        }
+
+        if (type.BaseType is not null)
+        {
+            return TryGetMemberMappingCore(type.BaseType, engineMemberName, out fullyQualifiedMemberName);
+        }
+
+        fullyQualifiedMemberName = null;
         return false;
     }
 

@@ -45,4 +45,13 @@ public sealed class GodotUtilityFunctionInfo
     /// </summary>
     [JsonPropertyName("arguments")]
     public GodotArgumentInfo[] Arguments { get; set; } = [];
+
+    /// <summary>
+    /// Documentation for this utility function.
+    /// </summary>
+    /// <remarks>
+    /// This is an optional field only present when <see cref="GodotApi"/> was generated with documentation included.
+    /// </remarks>
+    [JsonPropertyName("description")]
+    public string? Description { get; set; }
 }

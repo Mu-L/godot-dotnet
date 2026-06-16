@@ -18,6 +18,15 @@ public sealed class GodotEnumValueInfo
     public required long Value { get; set; }
 
     /// <summary>
+    /// Documentation for this enum member.
+    /// </summary>
+    /// <remarks>
+    /// This is an optional field only present when <see cref="GodotApi"/> was generated with documentation included.
+    /// </remarks>
+    [JsonPropertyName("description")]
+    public string? Description { get; set; }
+
+    /// <summary>
     /// Deconstructs the current enum member information.
     /// </summary>
     /// <param name="name">Name of the enum member.</param>

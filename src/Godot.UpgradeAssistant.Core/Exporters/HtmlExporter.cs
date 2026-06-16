@@ -128,7 +128,6 @@ public sealed class HtmlExporter : IExporter
 
     private static Task WriteFooterAsync(TextWriter writer, CancellationToken cancellationToken = default)
     {
-        // TODO: Update the repo URL when moving to the godotengine org.
         return WriteAsync(writer, """
 
                     <footer>

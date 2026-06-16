@@ -26,6 +26,7 @@ internal sealed class ConstantInfoConverter : JsonConverter<GodotConstantInfo>
         string? constantName = null;
         string? valueString = null;
         string? typeName = null;
+        string? description = null;
         bool valueIsInteger = false;
 
         while (reader.Read())
@@ -78,6 +79,11 @@ internal sealed class ConstantInfoConverter : JsonConverter<GodotConstantInfo>
                     }
                     break;
 
+                case "description":
+                    reader.Read();
+                    description = reader.GetString();
+                    break;
+
                 default:
                     throw new JsonException($"Unexpected property found: '{reader.GetString()}'");
             }
@@ -114,6 +120,7 @@ internal sealed class ConstantInfoConverter : JsonConverter<GodotConstantInfo>
             Name = constantName,
             Type = typeName,
             Value = valueString,
+            Description = description,
         };
     }
 

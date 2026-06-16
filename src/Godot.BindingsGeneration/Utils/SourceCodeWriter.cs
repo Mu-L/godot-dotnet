@@ -30,6 +30,30 @@ internal static class SourceCodeWriter
         writer.WriteLine('}');
     }
 
+    public static void WriteDocumentation(this IndentedTextWriter writer, MemberInfo member)
+    {
+        if (string.IsNullOrEmpty(member.Documentation))
+        {
+            return;
+        }
+
+        using StringReader reader = new(member.Documentation);
+        string? line;
+        while ((line = reader.ReadLine()) is not null)
+        {
+            writer.Write("///");
+
+            if (string.IsNullOrWhiteSpace(line))
+            {
+                writer.WriteLine();
+                continue;
+            }
+
+            writer.Write(' ');
+            writer.WriteLine(line);
+        }
+    }
+
     /// <summary>
     /// Write the member's attributes.
     /// </summary>

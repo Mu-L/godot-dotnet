@@ -1,4 +1,3 @@
-using System.Collections.Generic;
 using System.Linq;
 
 namespace Godot.BindingsGeneration.Reflection;
@@ -20,11 +19,6 @@ public class EnumInfo : TypeInfo
     public TypeInfo? UnderlyingType { get; set; }
 
     /// <summary>
-    /// Collection of the values of this enumeration type.
-    /// </summary>
-    public List<(string Name, long Value)> Values { get; set; } = [];
-
-    /// <summary>
     /// Constructs a new <see cref="EnumInfo"/>.
     /// </summary>
     /// <param name="name">Name of the enum.</param>
@@ -36,5 +30,5 @@ public class EnumInfo : TypeInfo
 
     /// <inheritdoc/>
     public override string ToString() =>
-        $"Enum: {Name} {{ {string.Join(", ", Values.Select(value => value.Name))} }}";
+        $"Enum: {Name} {{ {string.Join(", ", DeclaredFields.Select(value => value.Name))} }}";
 }
