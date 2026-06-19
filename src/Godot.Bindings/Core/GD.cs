@@ -335,6 +335,30 @@ public static partial class GD
         UtilityFunctions.Printt(strNative);
     }
 
+    /// <summary>
+    /// Prints a verbose message to the console.
+    /// The message is only printed if <see cref="OS.IsStdOutVerbose"/> is <see langword="true"/>.
+    /// </summary>
+    /// <param name="what">Message that will be printed.</param>
+    public static void PrintVerbose(string what)
+    {
+        using NativeGodotVariant strNative = NativeGodotVariant.CreateFromStringTakingOwnership(NativeGodotString.Create(what));
+        UtilityFunctions.PrintVerbose(strNative);
+    }
+
+    /// <summary>
+    /// Converts one or more arguments of any type to string in the best way possible
+    /// and prints them as a verbose message to the console.
+    /// The message is only printed if <see cref="OS.IsStdOutVerbose"/> is <see langword="true"/>.
+    /// </summary>
+    /// <param name="what">Message that will be printed.</param>
+    public static void PrintVerbose(params object[] what)
+    {
+        string message = AppendPrintParams(what);
+        using NativeGodotVariant strNative = NativeGodotVariant.CreateFromStringTakingOwnership(NativeGodotString.Create(message));
+        UtilityFunctions.PrintVerbose(strNative);
+    }
+
     private enum ErrorHandlerType
     {
         Error,
