@@ -667,4 +667,14 @@ public sealed class PackedVector2Array :
     {
         return AsReadOnlySpan().ToArray();
     }
+
+    /// <summary>
+    /// Converts this <see cref="PackedVector2Array"/> to a <see cref="PackedByteArray"/>.
+    /// </summary>
+    /// <returns>A <see cref="PackedByteArray"/> representation of this array.</returns>
+    public PackedByteArray ToPackedByteArray()
+    {
+        ref NativeGodotPackedVector2Array self = ref NativeValue.DangerousSelfRef;
+        return PackedByteArray.CreateTakingOwnership(NativeGodotPackedVector2Array.ToByteArray(ref self));
+    }
 }

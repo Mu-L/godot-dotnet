@@ -667,4 +667,14 @@ public sealed class PackedInt32Array :
     {
         return AsReadOnlySpan().ToArray();
     }
+
+    /// <summary>
+    /// Converts this <see cref="PackedInt32Array"/> to a <see cref="PackedByteArray"/>.
+    /// </summary>
+    /// <returns>A <see cref="PackedByteArray"/> representation of this array.</returns>
+    public PackedByteArray ToPackedByteArray()
+    {
+        ref NativeGodotPackedInt32Array self = ref NativeValue.DangerousSelfRef;
+        return PackedByteArray.CreateTakingOwnership(NativeGodotPackedInt32Array.ToByteArray(ref self));
+    }
 }

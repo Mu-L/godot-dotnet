@@ -589,4 +589,14 @@ public sealed class PackedStringArray :
     {
         return NativeValue.DangerousSelfRef.ToArray();
     }
+
+    /// <summary>
+    /// Converts this <see cref="PackedStringArray"/> to a <see cref="PackedByteArray"/>.
+    /// </summary>
+    /// <returns>A <see cref="PackedByteArray"/> representation of this array.</returns>
+    public PackedByteArray ToPackedByteArray()
+    {
+        ref NativeGodotPackedStringArray self = ref NativeValue.DangerousSelfRef;
+        return PackedByteArray.CreateTakingOwnership(NativeGodotPackedStringArray.ToByteArray(ref self));
+    }
 }
